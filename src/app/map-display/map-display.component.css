@@ -1,0 +1,42 @@
+@import '../../../node_modules/leaflet/dist/leaflet.css';
+
+article {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  li {
+    height: 0%;
+    border: 1px solid black;
+    list-style: none;
+    padding: 15%;
+  }
+  
+  ul {
+    overflow-y: scroll;
+    height: 100vh;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-left: 0;
+  
+  }
+  
+  ul, .map-container {
+    height: 87vh;
+  }
+  
+  .map-container {
+    position: absolute;
+    width: 75%;
+  }
+  
+  .map-frame {
+    border: 2px solid black;
+    height: 100%;
+  }
+  
+  #map {
+    height: 98vh;
+    width: 99vw;
+  }
+  
