@@ -22,11 +22,17 @@
             "tsConfig": "tsconfig.app.json",
             "assets": [
               "src/favicon.ico",
-              "src/assets"
+              "src/assets",
+              {
+                 "glob": "**/*",
+                 "input": "node_modules/leaflet/dist/images/",
+                 "output": "./assets/"
+              }
             ],
             "styles": [
               "src/styles.css",
-              "./node_modules/leaflet/dist/leaflet.css"
+              "./node_modules/leaflet/dist/leaflet.css",
+              "./node_modules/bootstrap/dist/css/bootstrap.min.css"
             ],
             "scripts": []
           },
@@ -85,11 +91,17 @@
             "tsConfig": "tsconfig.spec.json",
             "assets": [
               "src/favicon.ico",
-              "src/assets"
+              "src/assets",
+              {
+                 "glob": "**/*",
+                 "input": "node_modules/leaflet/dist/images/",
+                 "output": "./assets/"
+              }
             ],
             "styles": [
               "src/styles.css",
-              "./node_modules/leaflet/dist/leaflet.css"
+              "./node_modules/leaflet/dist/leaflet.css",
+              "./node_modules/bootstrap/dist/css/bootstrap.min.css"
             ],
             "scripts": []
           }

@@ -1,0 +1,13 @@
+<!--<ul class="list-group">
+    <li><a href="#" class="list-group-item list-group-item-action">High School 1</a></li>
+    <li><a href="#" class="list-group-item list-group-item-action">Middle School 2</a></li>
+    <li><a href="#" class="list-group-item list-group-item-action">Elementary School 3</a></li>
+</ul>-->
+
+<ul class="list-group">
+    <li *ngFor="let school of schools">
+        <a href="#" class="list-group-item list-group-item-action">
+        {{school.school}}
+        </a>
+    </li>
+</ul>

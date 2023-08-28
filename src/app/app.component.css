@@ -1,0 +1,9 @@
+ul {
+    display: flex;
+    margin: 0;
+    padding: 0;
+}
+
+#school-list {
+    width: 100%;
+}

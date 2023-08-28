@@ -1,0 +1,34 @@
+export interface PublicSchool {
+  School_Name: string;
+  State_Name: string;
+  State_Abbr: string;
+  School_ID: string;
+  Agency_Name: string;
+  School_Type: string;
+  Charter_School: string;
+  Magnet_School: string;
+  Shared_Time_School: string;
+  Locale: string;
+  Total_Students: number;
+  Lowest_Grade: string;
+  Highest_Grade: string;
+  School_Level: string;
+  FIPS_State_Code: number;
+  Street: string;
+  Phone_Number: number;
+  City: string;
+  ZIP: number;
+  County: string;
+  Website: string;
+  FT_Teachers: number;
+  Student_Teacher_Ratio: number;
+  Address: string;
+  Latitude: number;
+  Longitude: number;
+  Accuracy_Score: string;
+  Accuracy_Type: string;
+  Number: number;
+  Unit_Type: string;
+  Unit_Number: string;
+  Source: string;
+}

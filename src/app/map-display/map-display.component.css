@@ -1,42 +1,10 @@
-@import '../../../node_modules/leaflet/dist/leaflet.css';
+#map {
+  height: 100vh;
+  width: 70vw;
+}
 
-article {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  li {
-    height: 0%;
-    border: 1px solid black;
-    list-style: none;
-    padding: 15%;
-  }
-  
-  ul {
-    overflow-y: scroll;
-    height: 100vh;
-    margin-top: 0;
-    margin-bottom: 0;
-    padding-left: 0;
-  
-  }
-  
-  ul, .map-container {
-    height: 87vh;
-  }
-  
-  .map-container {
-    position: absolute;
-    width: 75%;
-  }
-  
-  .map-frame {
-    border: 2px solid black;
-    height: 100%;
-  }
-  
-  #map {
-    height: 98vh;
-    width: 99vw;
-  }
-  
+.custom-cluster {
+  background-color: 	#99eeee;  /* Customize the background color */
+  border: #99aaaa;            /* Customize the border style */
+  /* Add any other styling you want */
+}

@@ -1,0 +1,16 @@
+/*ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+li {
+    display: flex;
+    height: 10vh;
+    align-items: center;
+}*/
+
+ul {
+    height: 100vh;
+    overflow: hidden;
+    overflow-y: scroll;
+}

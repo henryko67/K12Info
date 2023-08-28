@@ -1,5 +1,10 @@
-<div
-    id="map"
-    leaflet 
-    [leafletOptions]="options">
+<div id="map"
+    leaflet
+    [leafletOptions]="options"
+    (leafletMapReady)="onMapReady($event)"
+
+    [leafletMarkerCluster]="markerClusterData"
+    (leafletMarkerClusterReady)="markerClusterReady($event)">
 </div>
+
+<!--<app-school-list [visibleMarkers]="visibleMarkers"></app-school-list>-->
