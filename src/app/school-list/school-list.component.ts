@@ -26,11 +26,15 @@ export class SchoolListComponent implements OnDestroy {
     this.subscription = this.markerService.getMarkers().subscribe(markers => {
       //console.log("SchoolListComponent: BehaviorSubject updated");
       //this.visibleMarkers = markers;
-      console.log(`school list markers: ${markers}`);
+      //console.log(`school list markers: ${markers}`);
+      const schoolList: CustomMarkerOptions[] = [];
       for (let marker of markers) {
-        this.schools.push((marker.options as CustomMarkerOptions));
+        //this.schools.push((marker.options as CustomMarkerOptions));
+        schoolList.push((marker.options as CustomMarkerOptions));
         //console.log((marker.options as CustomMarkerOptions));
       }
+      this.schools = schoolList;
+      console.log(`school list options: ${this.schools}`);
     });
   }
 
