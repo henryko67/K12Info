@@ -42,20 +42,49 @@ export class MapDisplayComponent implements OnInit {
 	markerClusterGroup: L.MarkerClusterGroup = L.markerClusterGroup();
 	markerClusterData: L.Marker[] = [];
 
+  // Open Street Map object
+  LAYER_OSM = {
+    id: 'openstreetmap',
+    name: 'Open Street Map',
+    enabled: true,
+    layer: L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    })
+  };
+
+  // World Imagery Map object
+  LAYER_WI = {
+    id: 'arcgisworldimagery',
+    name: 'World Imagery',
+    enabled: false,
+    layer: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+    })
+  }
+  // Leaflet layer options menu
+  layersControlOptions: L.Control.LayersOptions = {
+    position: 'topright',
+    collapsed: false
+  };
+
+  // Base layer object
+  baseLayers = {
+    'Open Street Map': this.LAYER_OSM.layer,
+    'Satellite': this.LAYER_WI.layer
+  };
+
   // Leaflet Map Details
 	optionsSpec: any = {
-		layers: [{ url: 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>' }],
 		zoom: 4.5,
     maxZoom: 15,
-    minZoom: 3,
-		center: [ 40.967243, -100.771556 ]
+    minZoom: 10,
+		center: [ 40.967243, -95.771556 ]
 	};
 
-	// Leaflet bindings
+	//Leaflet bindings
 	zoom = this.optionsSpec.zoom;
 	center = L.latLng(this.optionsSpec.center);
 	options = {
-		layers: [ L.tileLayer(this.optionsSpec.layers[0].url, { attribution: this.optionsSpec.layers[0].attribution }) ],
 		zoom: this.optionsSpec.zoom,
 		center: L.latLng(this.optionsSpec.center)
 	};
@@ -64,13 +93,18 @@ export class MapDisplayComponent implements OnInit {
     this.getPrivateSchools();
   }
 
-  // experimental function for shifted map view results
+  // Function detects changes on the map and requests updates for visible markers
   onMapReady(map: L.Map): void {
     map.on('moveend', () => {
       this.updateVisibleMarkers(map);
     });
   }
 
+  /**
+   * Function that actually updates the list of visible markers
+   * The function retreives the map and loops through every marker and checks which ones are within
+   * current viewable bounds
+  */
   updateVisibleMarkers(map: L.Map): void {
     const markerList: L.Marker[] = [];
   
@@ -109,9 +143,8 @@ export class MapDisplayComponent implements OnInit {
   }
 
   //school data loader onto map. basically creates private school objects based on private school class defined and loads onto the map
-  
   private generateData(psData: PrivateSchool[]): L.Marker[] {
-    console.log("we've reached data generation!");
+    //console.log("we've reached data generation!");
     const data: L.Marker[] = [];
 
     for (let school of psData) {

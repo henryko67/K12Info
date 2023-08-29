@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, ChangeDetectorRef  } from '@angular/core';
 import { MarkerService } from '../marker.service';
 import { Subscription } from 'rxjs';
 
@@ -22,7 +22,7 @@ export class SchoolListComponent implements OnDestroy {
   schools: CustomMarkerOptions[] = [];
   private subscription: Subscription;
 
-  constructor(private markerService: MarkerService) {
+  constructor(private markerService: MarkerService, private cdr: ChangeDetectorRef) {
     this.subscription = this.markerService.getMarkers().subscribe(markers => {
       //console.log("SchoolListComponent: BehaviorSubject updated");
       //this.visibleMarkers = markers;
@@ -34,7 +34,8 @@ export class SchoolListComponent implements OnDestroy {
         //console.log((marker.options as CustomMarkerOptions));
       }
       this.schools = schoolList;
-      console.log(`school list options: ${this.schools}`);
+      this.cdr.detectChanges();
+      //console.log(`school list options: ${this.schools}`);
     });
   }
 
