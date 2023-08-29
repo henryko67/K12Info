@@ -1,4 +1,4 @@
-import { Component, OnDestroy, ChangeDetectorRef  } from '@angular/core';
+import { Component, OnDestroy, ChangeDetectorRef, OnInit  } from '@angular/core';
 import { MarkerService } from '../marker.service';
 import { Subscription } from 'rxjs';
 
@@ -17,16 +17,15 @@ interface CustomMarkerOptions extends L.MarkerOptions {
   templateUrl: './school-list.component.html',
   styleUrls: ['./school-list.component.css']
 })
-export class SchoolListComponent implements OnDestroy {
+export class SchoolListComponent implements OnInit, OnDestroy {
   //visibleMarkers: L.Marker[] = [];
   schools: CustomMarkerOptions[] = [];
-  private subscription: Subscription;
+  subscription: Subscription = new Subscription();
 
-  constructor(private markerService: MarkerService, private cdr: ChangeDetectorRef) {
+  constructor(private markerService: MarkerService) {}
+
+  ngOnInit() {
     this.subscription = this.markerService.getMarkers().subscribe(markers => {
-      //console.log("SchoolListComponent: BehaviorSubject updated");
-      //this.visibleMarkers = markers;
-      //console.log(`school list markers: ${markers}`);
       const schoolList: CustomMarkerOptions[] = [];
       for (let marker of markers) {
         //this.schools.push((marker.options as CustomMarkerOptions));
@@ -34,8 +33,6 @@ export class SchoolListComponent implements OnDestroy {
         //console.log((marker.options as CustomMarkerOptions));
       }
       this.schools = schoolList;
-      this.cdr.detectChanges();
-      //console.log(`school list options: ${this.schools}`);
     });
   }
 

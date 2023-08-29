@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import * as L from 'leaflet';
 
@@ -7,22 +7,17 @@ import * as L from 'leaflet';
   providedIn: 'root'
 })
 export class MarkerService {
-  constructor() { }
-
-  //private visibleMarkers: L.Marker[] = [];
   private visibleMarkersSubject: BehaviorSubject<L.Marker[]> = new BehaviorSubject<L.Marker[]>([]);
+  visibleMarkers$ = this.visibleMarkersSubject.asObservable();
 
-  setMarkers(markers: L.Marker[]): void {
-    //console.log(`New Markers Set! ${markers}`)
-    //this.visibleMarkers = markers;
-    this.visibleMarkersSubject.next(markers);
-    //console.log(`Did I really set the visibleMarkers correctly? ${this.visibleMarkers}`);
+  constructor(private ngZone: NgZone) { }
+ 
+  setMarkers(newMarkers: L.Marker[]): void {
+    this.ngZone.run(() => {
+      this.visibleMarkersSubject.next(newMarkers); // Emit the new markers to subscribers
+    })
   }
 
-  /*getMarkers(): L.Marker[] {
-    console.log(`getMarkers called! ${this.visibleMarkers}`);
-    return this.visibleMarkers;
-  }*/
   getMarkers(): BehaviorSubject<L.Marker[]> {
     //console.log(`getMarkers called! ${this.visibleMarkersSubject}`);
     return this.visibleMarkersSubject;
