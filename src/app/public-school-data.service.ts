@@ -10,7 +10,9 @@ import { PublicSchool } from './publicSchool';
   providedIn: 'root'
 })
 export class PublicSchoolDataService {
-  private schoolUrl = 'https://hsinfo.s3.us-west-2.amazonaws.com/Public_School_Data.json';
+  //private schoolUrl = 'https://hsinfo.s3.us-west-2.amazonaws.com/Public_School_Data.json';
+  //private schoolUrl = 'http://localhost:4200/assets/Public_School_Data.json'
+  private schoolUrl = 'https://henryko67.github.io/data/Public_School_Data_Truncated.json';
 
   httpOptions = {
     headers: new HttpHeaders({ 'Content-Type': 'application/json' })

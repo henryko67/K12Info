@@ -1,4 +1,4 @@
-export interface PublicSchool {
+/*export interface PublicSchool {
   School_Name: string;
   State_Name: string;
   State_Abbr: string;
@@ -14,21 +14,27 @@ export interface PublicSchool {
   Highest_Grade: string;
   School_Level: string;
   FIPS_State_Code: number;
-  Street: string;
   Phone_Number: number;
-  City: string;
-  ZIP: number;
-  County: string;
   Website: string;
   FT_Teachers: number;
   Student_Teacher_Ratio: number;
-  Address: string;
+  Full_Address: string;
   Latitude: number;
   Longitude: number;
-  Accuracy_Score: string;
-  Accuracy_Type: string;
-  Number: number;
-  Unit_Type: string;
-  Unit_Number: string;
-  Source: string;
+  City: string;
+  County: String;
+  ZIP: number;
+  Country: string;
+  Private_Or_Public: string;
+}*/
+export interface PublicSchool {
+  School_Name: string;
+  State_Name: string;
+  Full_Address: string;
+  Latitude: number;
+  Longitude: number;
+  City: string;
+  ZIP: number;
+  Country: string;
+  Private_Or_Public: string;
 }

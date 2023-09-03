@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { forkJoin } from 'rxjs';
 
 import { PrivateSchool } from '../privateSchool';
 import { PrivateSchoolDataService } from '../private-school-data.service';
@@ -15,10 +16,7 @@ interface CustomMarkerOptions extends L.MarkerOptions {
   icon: L.Icon<L.IconOptions>;
   state: string;
   address: string;
-  level: string;
   school: string;
-  city: string;
-  type: string;
 }
 
 @Component({
@@ -90,7 +88,9 @@ export class MapDisplayComponent implements OnInit {
 	};
 
   ngOnInit(): void {
-    this.getPrivateSchools();
+    //this.getPrivateSchools();
+    //this.getPublicSchools();
+    this.getSchools();
   }
 
   // Function detects changes on the map and requests updates for visible markers
@@ -121,12 +121,58 @@ export class MapDisplayComponent implements OnInit {
 		this.markerClusterGroup = group;
 	}
 
+  /*getSchools(): void {
+    this.privateSchoolDataService.getPrivateSchoolData()
+    .subscribe(privateSchools => {this.privateSchools = privateSchools;
+    //this.showData(this.privateSchools);
+    console.log("We got the private schools");
+    this.markerClusterData = this.generateData(this.privateSchools);
+    });
+
+    this.publicSchoolDataService.getPublicSchoolData()
+    .subscribe(publicSchools => {this.publicSchools = publicSchools;
+    this.markerClusterData.concat(this.generateData(this.publicSchools))});
+    console.log("We got the public schools");
+    this.markerService.setMarkers(this.markerClusterData);
+  }*/
+
+  getSchools(): void {
+    forkJoin([
+      this.publicSchoolDataService.getPublicSchoolData(),
+      this.privateSchoolDataService.getPrivateSchoolData()
+    ]).subscribe(([publicSchools, privateSchools]) => {
+      this.publicSchools = publicSchools;
+      this.privateSchools = privateSchools;
+      
+      const publicMarkers = this.generateData(this.publicSchools);
+      const privateMarkers = this.generateData(this.privateSchools);
+  
+      // Combine the markers from both sources into one array
+      this.markerClusterData = publicMarkers.concat(privateMarkers);
+  
+      this.markerService.setMarkers(this.markerClusterData);
+  
+      console.log("Data loaded successfully.");
+    });
+  }
+
   // private school list retrieval
   getPrivateSchools(): void {
     this.privateSchoolDataService.getPrivateSchoolData()
     .subscribe(privateSchools => {this.privateSchools = privateSchools;
     //this.showData(this.privateSchools);
     this.markerClusterData = this.generateData(this.privateSchools);
+    this.markerService.setMarkers(this.markerClusterData);
+    });
+  }
+
+  // private school list retrieval
+  getPublicSchools(): void {
+    console.log("getting public schools");
+    this.publicSchoolDataService.getPublicSchoolData()
+    .subscribe(publicSchools => {this.publicSchools = publicSchools;
+    //this.showData(this.privateSchools);
+    this.markerClusterData = this.generateData(this.publicSchools);
     this.markerService.setMarkers(this.markerClusterData);
     });
   }
@@ -143,7 +189,7 @@ export class MapDisplayComponent implements OnInit {
   }
 
   //school data loader onto map. basically creates private school objects based on private school class defined and loads onto the map
-  private generateData(psData: PrivateSchool[]): L.Marker[] {
+  /*private generateData(psData: PrivateSchool[]): L.Marker[] {
     //console.log("we've reached data generation!");
     const data: L.Marker[] = [];
 
@@ -172,5 +218,34 @@ export class MapDisplayComponent implements OnInit {
     }
 
     return data;
+  }*/
+
+  private generateData(schoolData: PrivateSchool[] | PublicSchool[]): L.Marker[] {
+    console.log("we've reached data generation!");
+    const data: L.Marker[] = [];
+
+    for (let school of schoolData) {
+      //console.log(`State ${school.State_Name}`);
+      if (school != undefined) {
+        const markerOptions: CustomMarkerOptions = {
+          icon: L.icon({
+            iconSize: [ 25, 41 ],
+            iconAnchor: [ 13, 41 ],
+            iconUrl: 'assets/leaflet/marker-icon.png',
+            iconRetinaUrl: 'assets/leaflet/marker-icon-2x.png',
+            shadowUrl: 'assets/leaflet/marker-shadow.png'
+          }),
+          state: school.State_Name,
+          address: school.Full_Address,
+          school: school.School_Name
+        };
+        //console.log(`State should match: ${markerOptions.state}`);
+        const marker = L.marker([school.Latitude, school.Longitude], markerOptions).bindPopup(`NAME: ${school.School_Name} <br> ADDRESS: ${school.Full_Address} <br> STATE: ${school.State_Name}`);
+        data.push(marker);
+        //console.log(school.School_Name);
+      }
+    }
+    return data;
   }
+
 }

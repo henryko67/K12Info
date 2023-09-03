@@ -6,10 +6,7 @@ interface CustomMarkerOptions extends L.MarkerOptions {
   icon: L.Icon<L.IconOptions>;
   state: string;
   address: string;
-  level: string;
   school: string;
-  city: string;
-  type: string;
 }
 
 @Component({
@@ -33,7 +30,18 @@ export class SchoolListComponent implements OnInit, OnDestroy {
         //console.log((marker.options as CustomMarkerOptions));
       }
       this.schools = schoolList;
+      console.log("displaying schools");
     });
+  }
+
+  activeIndex: number | null = null;
+
+  toggleAccordion(index: number): void {
+    if (this.activeIndex === index) {
+      this.activeIndex = null; // Collapse if already open
+    } else {
+      this.activeIndex = index; // Expand if closed
+    }
   }
 
   ngOnDestroy(): void {

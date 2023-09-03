@@ -10,7 +10,8 @@ import { PrivateSchool } from './privateSchool';
   providedIn: 'root'
 })
 export class PrivateSchoolDataService {
-  private schoolUrl = 'https://henryko67.github.io/data/Private_School_Data.json';
+  //private schoolUrl = 'https://henryko67.github.io/data/Private_School_Data.json';
+  private schoolUrl = 'https://henryko67.github.io/data/Private_School_Data_Truncated.json';
 
   httpOptions = {
     headers: new HttpHeaders({ 'Content-Type': 'application/json' })

@@ -27,7 +27,8 @@
                  "glob": "**/*",
                  "input": "node_modules/leaflet/dist/images/",
                  "output": "./assets/"
-              }
+              },
+              { "glob": "Public_School_Data.json", "input": "./src/assets", "output": "./assets/" }
             ],
             "styles": [
               "src/styles.css",
@@ -96,7 +97,8 @@
                  "glob": "**/*",
                  "input": "node_modules/leaflet/dist/images/",
                  "output": "./assets/"
-              }
+              },
+              { "glob": "Public_School_Data.json", "input": "./src/assets", "output": "./assets/" }
             ],
             "styles": [
               "src/styles.css",

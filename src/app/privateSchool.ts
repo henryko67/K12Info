@@ -1,4 +1,4 @@
-export interface PrivateSchool {
+/*export interface PrivateSchool {
   School_Name: string;
   State_Name: string;
   NCES_ID: string;
@@ -10,9 +10,8 @@ export interface PrivateSchool {
   Total_Students: number;
   Student_Teacher_Ratio: number;
   FT_Teachers: number;
-  Address: string;
   City: string;
-  State: string;
+  State_Abbr: string;
   ZIP: number;
   Library_Media_Center: string;
   Length: number;
@@ -39,4 +38,19 @@ export interface PrivateSchool {
   Full_Address: string;
   Latitude: number;
   Longitude: number;
+  Country: string;
+  Private_Or_Public: string;
+}
+*/
+
+export interface PrivateSchool {
+  School_Name: string;
+  State_Name: string;
+  City: string;
+  ZIP: number;
+  Full_Address: string;
+  Latitude: number;
+  Longitude: number;
+  Country: string;
+  Private_Or_Public: string;
 }
