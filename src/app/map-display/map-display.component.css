@@ -1,6 +1,18 @@
+:host {
+  display: flex;
+  height: 100%;
+}
+
 #map {
-  height: 100vh;
   width: 70vw;
+}
+
+#search-button {
+  position: absolute;
+  top: calc(100% - 50px);
+  right: 60vw;
+  z-index: 1000;
+  border-radius: 25px;
 }
 
 .custom-cluster {

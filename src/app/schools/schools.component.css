@@ -1,0 +1,22 @@
+:host {
+    flex: 1;
+}
+
+ul {
+    display: flex;
+    flex-direction: row;
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+    height: 100%;
+    position: relative;
+}
+
+#school-list {
+    width: calc(30vw - 17px);
+    flex: 1;
+}
+
+app-map-display {
+    flex: 1;
+}

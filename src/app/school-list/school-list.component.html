@@ -14,14 +14,14 @@
 -->
 
 <ul class="list-group">
-    <li *ngFor="let school of schools; let i = index">
-      <a href="#" class="list-group-item list-group-item-action" (click)="toggleAccordion(i)">
-        {{ school.school }}
-      </a>
-      <div class="collapse" [ngClass]="{'show': activeIndex === i}">
-        <h2>{{ school.school }}</h2>
-        <h3>Details:</h3>
-        <h4>Address: {{ school.address }}</h4>
-      </div>
-    </li>
-  </ul>
+  <li *ngFor="let school of schools; let i = index">
+    <a class="list-group-item list-group-item-action" (click)="toggleAccordion(i)">
+      {{ school.school }}
+    </a>
+    <div class="collapse" [ngClass]="{'show': activeIndex === i}">
+      <h2>{{ school.school }}</h2>
+      <h3>Details:</h3>
+      <h4>Address: {{ school.address }}</h4>
+    </div>
+  </li>
+</ul>

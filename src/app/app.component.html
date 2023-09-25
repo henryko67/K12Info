@@ -1,14 +1,11 @@
+<header>
+    <h1>K12Info</h1>
+</header>
 <nav>
-    <a routerLink="/about">About Us</a>
-    <a routerLink="/contact">Contact Us</a>
+    <ul id="tabs">
+        <li><a routerLink="/about">About Us</a></li>
+        <li><a routerLink="/contact">Contact Us</a></li>
+        <li><a routerLink="/schools">Find Schools</a></li>
+    </ul>
 </nav>
 <router-outlet></router-outlet>
-<ul>
-    <li>
-        <app-map-display></app-map-display>
-    </li>
-    <li id="school-list">
-        <app-school-list></app-school-list>
-    </li>
-</ul>
-

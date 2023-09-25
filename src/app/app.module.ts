@@ -11,6 +11,7 @@ import { MapDisplayComponent } from './map-display/map-display.component';
 import { SchoolListComponent } from './school-list/school-list.component';
 import { AboutUsComponent } from './about-us/about-us.component';
 import { ContactUsComponent } from './contact-us/contact-us.component';
+import { SchoolsComponent } from './schools/schools.component';
 
 @NgModule({
   declarations: [
@@ -18,7 +19,8 @@ import { ContactUsComponent } from './contact-us/contact-us.component';
     MapDisplayComponent,
     SchoolListComponent,
     AboutUsComponent,
-    ContactUsComponent
+    ContactUsComponent,
+    SchoolsComponent
   ],
   imports: [
     BrowserModule,

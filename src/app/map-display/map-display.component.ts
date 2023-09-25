@@ -28,7 +28,7 @@ interface CustomMarkerOptions extends L.MarkerOptions {
 export class MapDisplayComponent implements OnInit {
   privateSchools: PrivateSchool[] = [];
   publicSchools: PublicSchool[] = [];
-  visibleMarkers: L.Marker[] = [];
+  markers: L.Marker[] = [];
 
   constructor(
     private privateSchoolDataService: PrivateSchoolDataService,
@@ -36,10 +36,14 @@ export class MapDisplayComponent implements OnInit {
     private markerService: MarkerService
     ) { }
 
-    // Marker cluster stuff
+  // Map object
+  map!: L.Map;
+
+  // Marker cluster stuff
 	markerClusterGroup: L.MarkerClusterGroup = L.markerClusterGroup();
 	markerClusterData: L.Marker[] = [];
-
+  searchAreaMode: boolean = false;
+  
   // Open Street Map object
   LAYER_OSM = {
     id: 'openstreetmap',
@@ -93,11 +97,43 @@ export class MapDisplayComponent implements OnInit {
     this.getSchools();
   }
 
-  // Function detects changes on the map and requests updates for visible markers
-  onMapReady(map: L.Map): void {
+  /**
+   * Function detects changes on the map and requests updates for visible markers.
+   * Function is currently disabled for optimization purposes.
+   */
+  /*onMapReady(map: L.Map): void {
     map.on('moveend', () => {
       this.updateVisibleMarkers(map);
     });
+  }*/
+
+  onMapReady(map: L.Map): void {
+    this.map = map;
+  }
+
+  // Function creates the functionality of searching the map boundaries for markers
+
+  searchArea() {
+    this.searchAreaMode = !this.searchAreaMode;
+
+    //this.getSchools();
+
+    // Clear te current marker cluster group;
+    this.markerClusterGroup.clearLayers();
+    this.markerClusterData = [];
+
+    this.markers.forEach(marker => {
+      if (this.map.getBounds().contains(marker.getLatLng())) {
+        this.markerClusterData.push(marker);
+        this.markerClusterGroup.addLayer(marker);
+      }
+    });
+
+    this.map.addLayer(this.markerClusterGroup);
+
+    this.markerService.setMarkers(this.markerClusterData);
+
+    //this.updateVisibleMarkers(this.map);
   }
 
   /**
@@ -107,34 +143,16 @@ export class MapDisplayComponent implements OnInit {
   */
   updateVisibleMarkers(map: L.Map): void {
     const markerList: L.Marker[] = [];
+    const bounds: L.LatLngBounds = map.getBounds();
   
     this.markerClusterData.forEach(marker => {
-      if (map.getBounds().contains(marker.getLatLng())) {
+      if (bounds.contains(marker.getLatLng())) {
         markerList.push(marker);
       }
     });
   
     this.markerService.setMarkers(markerList); // Update markers in the service
   }
-
-  markerClusterReady(group: L.MarkerClusterGroup) {
-		this.markerClusterGroup = group;
-	}
-
-  /*getSchools(): void {
-    this.privateSchoolDataService.getPrivateSchoolData()
-    .subscribe(privateSchools => {this.privateSchools = privateSchools;
-    //this.showData(this.privateSchools);
-    console.log("We got the private schools");
-    this.markerClusterData = this.generateData(this.privateSchools);
-    });
-
-    this.publicSchoolDataService.getPublicSchoolData()
-    .subscribe(publicSchools => {this.publicSchools = publicSchools;
-    this.markerClusterData.concat(this.generateData(this.publicSchools))});
-    console.log("We got the public schools");
-    this.markerService.setMarkers(this.markerClusterData);
-  }*/
 
   getSchools(): void {
     forkJoin([
@@ -148,9 +166,11 @@ export class MapDisplayComponent implements OnInit {
       const privateMarkers = this.generateData(this.privateSchools);
   
       // Combine the markers from both sources into one array
-      this.markerClusterData = publicMarkers.concat(privateMarkers);
+      //this.markerClusterData = publicMarkers.concat(privateMarkers);
+
+      this.markers = publicMarkers.concat(privateMarkers);
   
-      this.markerService.setMarkers(this.markerClusterData);
+      //this.markerService.setMarkers(this.markerClusterData);
   
       console.log("Data loaded successfully.");
     });
@@ -187,38 +207,6 @@ export class MapDisplayComponent implements OnInit {
       }
     }
   }
-
-  //school data loader onto map. basically creates private school objects based on private school class defined and loads onto the map
-  /*private generateData(psData: PrivateSchool[]): L.Marker[] {
-    //console.log("we've reached data generation!");
-    const data: L.Marker[] = [];
-
-    for (let school of psData) {
-      //console.log(`State ${school.State_Name}`);
-      if (school != undefined) {
-        const markerOptions: CustomMarkerOptions = {
-          icon: L.icon({
-            iconSize: [ 25, 41 ],
-            iconAnchor: [ 13, 41 ],
-            iconUrl: 'assets/leaflet/marker-icon.png',
-            iconRetinaUrl: 'assets/leaflet/marker-icon-2x.png',
-            shadowUrl: 'assets/leaflet/marker-shadow.png'
-          }),
-          state: school.State_Name,
-          address: school.Full_Address,
-          level: school.School_Level,
-          school: school.School_Name,
-          city: school.City,
-          type: school.School_Type
-        };
-        //console.log(`State should match: ${markerOptions.state}`);
-        const marker = L.marker([school.Latitude, school.Longitude], markerOptions).bindPopup(`NAME: ${school.School_Name} <br> ADDRESS: ${school.Full_Address} <br> STATE: ${school.State_Name}`);
-        data.push(marker);
-      }
-    }
-
-    return data;
-  }*/
 
   private generateData(schoolData: PrivateSchool[] | PublicSchool[]): L.Marker[] {
     console.log("we've reached data generation!");
