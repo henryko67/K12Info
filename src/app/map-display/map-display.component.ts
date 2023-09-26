@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { forkJoin } from 'rxjs';
 
 import { PrivateSchool } from '../privateSchool';
@@ -17,6 +17,7 @@ interface CustomMarkerOptions extends L.MarkerOptions {
   state: string;
   address: string;
   school: string;
+  id: number;
 }
 
 @Component({
@@ -26,6 +27,7 @@ interface CustomMarkerOptions extends L.MarkerOptions {
 })
 
 export class MapDisplayComponent implements OnInit {
+
   privateSchools: PrivateSchool[] = [];
   publicSchools: PublicSchool[] = [];
   markers: L.Marker[] = [];
@@ -211,6 +213,7 @@ export class MapDisplayComponent implements OnInit {
   private generateData(schoolData: PrivateSchool[] | PublicSchool[]): L.Marker[] {
     console.log("we've reached data generation!");
     const data: L.Marker[] = [];
+    let markerID: number = 0;
 
     for (let school of schoolData) {
       //console.log(`State ${school.State_Name}`);
@@ -225,13 +228,15 @@ export class MapDisplayComponent implements OnInit {
           }),
           state: school.State_Name,
           address: school.Full_Address,
-          school: school.School_Name
+          school: school.School_Name,
+          id: markerID
         };
         //console.log(`State should match: ${markerOptions.state}`);
         const marker = L.marker([school.Latitude, school.Longitude], markerOptions).bindPopup(`NAME: ${school.School_Name} <br> ADDRESS: ${school.Full_Address} <br> STATE: ${school.State_Name}`);
         data.push(marker);
         //console.log(school.School_Name);
       }
+      markerID++;
     }
     return data;
   }

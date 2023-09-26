@@ -1,4 +1,4 @@
-import { Component, OnDestroy, ChangeDetectorRef, OnInit  } from '@angular/core';
+import { Component, OnDestroy, OnInit, Input, Output, EventEmitter, ViewChildren, ElementRef, QueryList } from '@angular/core';
 import { MarkerService } from '../marker.service';
 import { Subscription } from 'rxjs';
 
@@ -7,6 +7,7 @@ interface CustomMarkerOptions extends L.MarkerOptions {
   state: string;
   address: string;
   school: string;
+  id: number;
 }
 
 @Component({
@@ -15,6 +16,7 @@ interface CustomMarkerOptions extends L.MarkerOptions {
   styleUrls: ['./school-list.component.css']
 })
 export class SchoolListComponent implements OnInit, OnDestroy {
+
   //visibleMarkers: L.Marker[] = [];
   schools: CustomMarkerOptions[] = [];
   subscription: Subscription = new Subscription();
