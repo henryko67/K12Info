@@ -73,3 +73,20 @@ ul::-webkit-scrollbar-thumb:hover {
 a:hover {
     cursor: pointer;
 }
+
+.scrolled-into-view {
+    background-color: #e0e0e0;
+}
+
+button {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: white;
+    border: none;
+    z-index: 1000;
+}
+
+.content-container {
+    position: relative;
+  }

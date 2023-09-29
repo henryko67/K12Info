@@ -1,4 +1,4 @@
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, ElementRef } from '@angular/core';
 import { forkJoin } from 'rxjs';
 
 import { PrivateSchool } from '../privateSchool';
@@ -8,6 +8,7 @@ import { PublicSchool } from '../publicSchool';
 import { PublicSchoolDataService } from '../public-school-data.service';
 
 import { MarkerService } from '../marker.service';
+import { ActiveMarkerService } from '../active-marker.service';
 
 import * as L from 'leaflet';
 import 'leaflet.markercluster';
@@ -35,7 +36,8 @@ export class MapDisplayComponent implements OnInit {
   constructor(
     private privateSchoolDataService: PrivateSchoolDataService,
     private publicSchoolDataService: PublicSchoolDataService,
-    private markerService: MarkerService
+    private markerService: MarkerService,
+    private activeMarkerService: ActiveMarkerService
     ) { }
 
   // Map object
@@ -47,7 +49,7 @@ export class MapDisplayComponent implements OnInit {
   searchAreaMode: boolean = false;
   
   // Open Street Map object
-  LAYER_OSM = {
+  LAYER_OSM: any = {
     id: 'openstreetmap',
     name: 'Open Street Map',
     enabled: true,
@@ -57,7 +59,7 @@ export class MapDisplayComponent implements OnInit {
   };
 
   // World Imagery Map object
-  LAYER_WI = {
+  LAYER_WI: any = {
     id: 'arcgisworldimagery',
     name: 'World Imagery',
     enabled: false,
@@ -72,7 +74,7 @@ export class MapDisplayComponent implements OnInit {
   };
 
   // Base layer object
-  baseLayers = {
+  baseLayers: any = {
     'Open Street Map': this.LAYER_OSM.layer,
     'Satellite': this.LAYER_WI.layer
   };
@@ -85,7 +87,7 @@ export class MapDisplayComponent implements OnInit {
 		center: [ 40.967243, -95.771556 ]
 	};
 
-	//Leaflet bindings
+	// Leaflet bindings
 	zoom = this.optionsSpec.zoom;
 	center = L.latLng(this.optionsSpec.center);
 	options = {
@@ -93,10 +95,34 @@ export class MapDisplayComponent implements OnInit {
 		center: L.latLng(this.optionsSpec.center)
 	};
 
+  // Active marker settings
+  activeMarkerIcon: L.Icon = L.icon({
+    iconSize: [ 25, 41 ],
+    iconAnchor: [ 13, 41 ],
+    iconUrl: 'assets/leaflet/marker-icon-selected.png',
+    iconRetinaUrl: 'assets/leaflet/marker-icon-2x-selected.png',
+    shadowUrl: 'assets/leaflet/marker-shadow.png'
+  })
+
+  // Normal marker settings
+  normalMarkerIcon: L.Icon = L.icon({
+    iconSize: [ 25, 41 ],
+    iconAnchor: [ 13, 41 ],
+    iconUrl: 'assets/leaflet/marker-icon.png',
+    iconRetinaUrl: 'assets/leaflet/marker-icon-2x.png',
+    shadowUrl: 'assets/leaflet/marker-shadow.png'
+  });
+
   ngOnInit(): void {
     //this.getPrivateSchools();
     //this.getPublicSchools();
     this.getSchools();
+
+    this.activeMarkerService.getActiveId$().subscribe(activeId => {
+      if (activeId !== null) {
+        this.zoomToMarker(activeId);
+      }
+    });
   }
 
   /**
@@ -113,9 +139,29 @@ export class MapDisplayComponent implements OnInit {
     this.map = map;
   }
 
+  markerToChangeIcon: L.Marker | undefined;
+
+  onMarkerClick(markerId: number): void {
+    this.activeMarkerService.setActiveId(markerId);
+
+    if (this.markerToChangeIcon != null) {
+      // Change the icon of the marker to the active marker icon
+      this.markerToChangeIcon.setIcon(this.normalMarkerIcon);
+    }
+    this.markerToChangeIcon = this.markers.find((marker) => (marker.options as CustomMarkerOptions).id === markerId);
+    this.markerToChangeIcon?.setIcon(this.activeMarkerIcon);
+  }
+
+  zoomToMarker(activeId: number): void {
+    const marker = this.markers.find(marker => (marker.options as CustomMarkerOptions).id === activeId);
+    if (marker) {
+      this.map.setView(marker.getLatLng(), 7);
+    }
+  }
+
   // Function creates the functionality of searching the map boundaries for markers
 
-  searchArea() {
+  searchArea(): void {
     this.searchAreaMode = !this.searchAreaMode;
 
     //this.getSchools();
@@ -126,6 +172,10 @@ export class MapDisplayComponent implements OnInit {
 
     this.markers.forEach(marker => {
       if (this.map.getBounds().contains(marker.getLatLng())) {
+        marker.on('click', () => {
+          this.onMarkerClick((marker.options as CustomMarkerOptions).id);
+          console.log((marker.options as CustomMarkerOptions).id);
+        });
         this.markerClusterData.push(marker);
         this.markerClusterGroup.addLayer(marker);
       }
@@ -219,20 +269,15 @@ export class MapDisplayComponent implements OnInit {
       //console.log(`State ${school.State_Name}`);
       if (school != undefined) {
         const markerOptions: CustomMarkerOptions = {
-          icon: L.icon({
-            iconSize: [ 25, 41 ],
-            iconAnchor: [ 13, 41 ],
-            iconUrl: 'assets/leaflet/marker-icon.png',
-            iconRetinaUrl: 'assets/leaflet/marker-icon-2x.png',
-            shadowUrl: 'assets/leaflet/marker-shadow.png'
-          }),
+          icon: this.normalMarkerIcon,
           state: school.State_Name,
           address: school.Full_Address,
           school: school.School_Name,
           id: markerID
         };
         //console.log(`State should match: ${markerOptions.state}`);
-        const marker = L.marker([school.Latitude, school.Longitude], markerOptions).bindPopup(`NAME: ${school.School_Name} <br> ADDRESS: ${school.Full_Address} <br> STATE: ${school.State_Name}`);
+        //const marker = L.marker([school.Latitude, school.Longitude], markerOptions).bindPopup(`NAME: ${school.School_Name} <br> ADDRESS: ${school.Full_Address} <br> STATE: ${school.State_Name}`);
+        const marker = L.marker([school.Latitude, school.Longitude], markerOptions);
         data.push(marker);
         //console.log(school.School_Name);
       }

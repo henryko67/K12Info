@@ -12,6 +12,7 @@ import { SchoolListComponent } from './school-list/school-list.component';
 import { AboutUsComponent } from './about-us/about-us.component';
 import { ContactUsComponent } from './contact-us/contact-us.component';
 import { SchoolsComponent } from './schools/schools.component';
+import { ActiveMarkerService } from './active-marker.service';
 
 @NgModule({
   declarations: [
@@ -29,7 +30,7 @@ import { SchoolsComponent } from './schools/schools.component';
     LeafletMarkerClusterModule,
     HttpClientModule
   ],
-  providers: [],
+  providers: [ActiveMarkerService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
