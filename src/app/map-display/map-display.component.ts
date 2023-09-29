@@ -44,7 +44,9 @@ export class MapDisplayComponent implements OnInit {
   map!: L.Map;
 
   // Marker cluster stuff
-	markerClusterGroup: L.MarkerClusterGroup = L.markerClusterGroup();
+	markerClusterGroup: L.MarkerClusterGroup = L.markerClusterGroup({
+    disableClusteringAtZoom: 12
+  });
 	markerClusterData: L.Marker[] = [];
   searchAreaMode: boolean = false;
   
@@ -148,7 +150,7 @@ export class MapDisplayComponent implements OnInit {
   zoomToMarker(activeId: number): void {
     const marker = this.markers.find(marker => (marker.options as CustomMarkerOptions).id === activeId);
     if (marker) {
-      this.map.setView(marker.getLatLng(), 7);
+      this.map.setView(marker.getLatLng(), 12);
 
       if (this.markerToChangeIcon != null) {
         // Change the icon of the marker to the active marker icon
