@@ -166,9 +166,7 @@ export class MapDisplayComponent implements OnInit {
   searchArea(): void {
     this.searchAreaMode = !this.searchAreaMode;
 
-    //this.getSchools();
-
-    // Clear te current marker cluster group;
+    // Clear the current marker cluster group;
     this.markerClusterGroup.clearLayers();
     this.markerClusterData = [];
 
@@ -186,8 +184,6 @@ export class MapDisplayComponent implements OnInit {
     this.map.addLayer(this.markerClusterGroup);
 
     this.markerService.setMarkers(this.markerClusterData);
-
-    //this.updateVisibleMarkers(this.map);
   }
 
   /**
@@ -220,11 +216,8 @@ export class MapDisplayComponent implements OnInit {
       const privateMarkers = this.generateData(this.privateSchools);
   
       // Combine the markers from both sources into one array
-      //this.markerClusterData = publicMarkers.concat(privateMarkers);
 
       this.markers = publicMarkers.concat(privateMarkers);
-  
-      //this.markerService.setMarkers(this.markerClusterData);
   
       console.log("Data loaded successfully.");
     });
@@ -281,7 +274,6 @@ export class MapDisplayComponent implements OnInit {
         //const marker = L.marker([school.Latitude, school.Longitude], markerOptions).bindPopup(`NAME: ${school.School_Name} <br> ADDRESS: ${school.Full_Address} <br> STATE: ${school.State_Name}`);
         const marker = L.marker([school.Latitude, school.Longitude], markerOptions);
         data.push(marker);
-        //console.log(school.School_Name);
       }
       markerID++;
     }
