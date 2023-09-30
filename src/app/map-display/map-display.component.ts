@@ -150,7 +150,11 @@ export class MapDisplayComponent implements OnInit {
   zoomToMarker(activeId: number): void {
     const marker = this.markers.find(marker => (marker.options as CustomMarkerOptions).id === activeId);
     if (marker) {
-      this.map.setView(marker.getLatLng(), 12);
+      if (this.map.getZoom() <= 12) {
+        this.map.setView(marker.getLatLng(), 12);
+      } else {
+        this.map.setView(marker.getLatLng());
+      }
 
       if (this.markerToChangeIcon != null) {
         // Change the icon of the marker to the active marker icon
