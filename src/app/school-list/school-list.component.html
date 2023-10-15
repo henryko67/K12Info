@@ -1,9 +1,9 @@
 <ul class="list-group" #mapDisplay>
-  <li *ngFor="let school of schools; let i = index" [id]="'school-' + school.id">
-    <a (click)="onSchoolItemClick(school.id, i)" class="list-group-item list-group-item-action">
+  <li *ngFor="let school of schools" [id]="'school-' + school.id">
+    <a (click)="onSchoolItemClick(school.id)" class="list-group-item list-group-item-action">
       {{ school.school }}
     </a>
-    <div class="collapse" [ngClass]="{'show': activeIndex === i}">
+    <div class="collapse">
       <div class="content-container">
         <button type="button" class="close" aria-label="Close"
       (click)="clearActive()"><span aria-hidden="true">

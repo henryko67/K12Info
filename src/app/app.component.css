@@ -41,7 +41,7 @@ h1 {
     border-right: 1px solid black;
 }
 
-h1, #tabs > li > a {
+#tabs > li > a {
     padding: 1vmin;
 }
 
