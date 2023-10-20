@@ -14,7 +14,7 @@ To get more help on the Angular CLI use `ng help` or go check out the [Angular C
 
 ## Demo Available!
 
-Keep in mind, this is a work in progress, but the current demo is available [here](k12info.com).
+Keep in mind, this is a work in progress, but the current demo is available [here](https://k12info.com).
 
 ## Change Logs
 
