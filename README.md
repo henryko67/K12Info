@@ -14,9 +14,7 @@ To get more help on the Angular CLI use `ng help` or go check out the [Angular C
 
 ## Demo Available!
 
-Keep in mind, this is a work in progress, but the current demo is available [here](https://henryko67.github.io/K12Info).
-
-NOTE: There appears to be something wrong with GitHub Pages at the moment. If you wish to see the application's current state, I suggest you download the repo and run the application locally. I will try to fix the GitHub Pages deployment in the mean time.
+Keep in mind, this is a work in progress, but the current demo is available [here](k12info.com).
 
 ## Change Logs
 
