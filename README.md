@@ -2,6 +2,14 @@
 
 Service that shows schools from Kindergartens to High Schools
 
+## Demo Available!
+
+Keep in mind, this is a work in progress, but the current demo is available [here](https://k12info.com).
+
+## Keep track of updates!
+
+Feel free to check out progress on the [Trello board](https://trello.com/b/Z5ogiZdg/k12info)!
+
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 16.1.6.
 
 ## Development server
@@ -11,10 +19,6 @@ Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The appli
 ## Further help
 
 To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
-
-## Demo Available!
-
-Keep in mind, this is a work in progress, but the current demo is available [here](https://k12info.com).
 
 ## Change Logs
 
