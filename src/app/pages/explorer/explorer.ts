@@ -1,0 +1,21 @@
+import { Component } from '@angular/core';
+
+import { SearchBar } from './components/search-bar/search-bar';
+import { FilterPanel } from './components/filter-panel/filter-panel';
+import { Map } from './components/map/map';
+import { ResultsSidebar } from './components/results-sidebar/results-sidebar';
+import { SchoolPreview } from './components/school-preview/school-preview';
+
+@Component({
+  selector: 'app-explorer',
+  imports: [
+    SearchBar,
+    FilterPanel,
+    Map,
+    ResultsSidebar,
+    SchoolPreview
+  ],
+  templateUrl: './explorer.html',
+  styleUrl: './explorer.css'
+})
+export class Explorer {}
