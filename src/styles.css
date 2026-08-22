@@ -1,2 +1,66 @@
-/* You can add global styles to this file, and also import other style files */
 @import 'leaflet/dist/leaflet.css';
+
+:root {
+  color-scheme: light;
+
+  --navbar-height: 4rem;
+  --color-background: #ffffff;
+  --color-surface: #f2f3f5;
+  --color-surface-raised: #ffffff;
+  --color-border: #d4d7dc;
+  --color-text: #2e3338;
+  --color-text-muted: #5c6370;
+  --color-accent: #5865f2;
+  --color-accent-hover: #4752c4;
+  --color-focus-ring: rgba(88, 101, 242, 0.35);
+  --font-sans: "gg sans", "Noto Sans", "Helvetica Neue", Helvetica, Arial,
+    sans-serif;
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  --color-background: #1e1f22;
+  --color-surface: #2b2d31;
+  --color-surface-raised: #313338;
+  --color-border: #3f4147;
+  --color-text: #f2f3f5;
+  --color-text-muted: #b5bac1;
+  --color-accent: #5865f2;
+  --color-accent-hover: #4752c4;
+  --color-focus-ring: rgba(88, 101, 242, 0.45);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}

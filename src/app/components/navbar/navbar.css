@@ -1,0 +1,61 @@
+:host {
+  display: block;
+  height: var(--navbar-height);
+}
+
+nav {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding-inline: clamp(1rem, 3vw, 2rem);
+  background: var(--color-surface-raised);
+  border-bottom: 1px solid var(--color-border);
+}
+
+#tabs {
+  display: flex;
+  align-items: center;
+  gap: clamp(1rem, 3vw, 2rem);
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+#tabs li:first-child {
+  margin-right: clamp(0.5rem, 2vw, 1.5rem);
+}
+
+#tabs li:first-child a {
+  color: var(--color-text);
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+#tabs a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  color: var(--color-text-muted);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 120ms ease;
+}
+
+#tabs a:hover {
+  color: var(--color-text);
+}
+
+@media (max-width: 40rem) {
+  nav {
+    padding-inline: 1rem;
+  }
+
+  #tabs {
+    gap: 1rem;
+  }
+
+  #tabs li:first-child {
+    margin-right: auto;
+  }
+}

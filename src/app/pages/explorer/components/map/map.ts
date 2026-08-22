@@ -2,8 +2,11 @@ import {
   AfterViewInit,
   Component,
   ElementRef,
-  ViewChild
+  ViewChild,
+  inject
 } from '@angular/core';
+
+import { ExplorerStore } from '../../services/explorer-store';
 
 import * as L from 'leaflet';
 
@@ -14,6 +17,8 @@ import * as L from 'leaflet';
   styleUrl: './map.css'
 })
 export class Map implements AfterViewInit {
+
+  private explorerStore = inject(ExplorerStore);
 
   @ViewChild('mapContainer')
   mapContainer!: ElementRef<HTMLDivElement>;

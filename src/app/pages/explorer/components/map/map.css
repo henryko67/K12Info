@@ -1,4 +1,13 @@
+:host {
+  display: block;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--color-surface);
+}
+
 .map-container {
-  height: 600px;
+  height: 100%;
+  min-height: 24rem;
   width: 100%;
 }

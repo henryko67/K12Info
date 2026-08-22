@@ -6,6 +6,8 @@ import { Map } from './components/map/map';
 import { ResultsSidebar } from './components/results-sidebar/results-sidebar';
 import { SchoolPreview } from './components/school-preview/school-preview';
 
+import { ExplorerStore } from './services/explorer-store';
+
 @Component({
   selector: 'app-explorer',
   imports: [
@@ -15,7 +17,10 @@ import { SchoolPreview } from './components/school-preview/school-preview';
     ResultsSidebar,
     SchoolPreview
   ],
+  providers: [ExplorerStore],
   templateUrl: './explorer.html',
   styleUrl: './explorer.css'
 })
-export class Explorer {}
+export class Explorer {
+  
+}

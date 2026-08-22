@@ -1,1 +1,93 @@
-<p>search-bar works!</p>
+<div class="search-container">
+
+  <form [formGroup]="searchForm" class="search-form" (ngSubmit) = "onSearch()">
+    <input
+    type="search"
+    id="school-search"
+    name="q"
+    placeholder="Search schools or locations"
+    formControlName="query"
+    aria-label="Search schools or locations"
+    (focus)="openExistingResults()"
+    />
+
+    <button type="submit">
+      Search
+    </button>
+  </form>
+
+  @if (resultsOpen()) {
+    <div class="search-results">
+
+        @if (
+            locationSearchResults().length === 0 &&
+            schoolSearchResults().length === 0
+        ) {
+            <p>No results found.</p>
+        }
+
+        @if (locationSearchResults().length > 0) {
+            <section>
+            <h3>Locations</h3>
+
+            @for (location of locationSearchResults(); track location._id) {
+                <button type="button" class="search-result">
+                    {{ location.label }}
+                </button>
+            }
+
+            @if (paginationResults()?.locationHasMore) {
+                <button
+                type="button"
+                class="load-more-results"
+                [disabled]="loadingMoreLocations()"
+                (click)="onLoadMoreLocations()"
+                >
+                    @if (loadingMoreLocations()) {
+                        Loading...
+                    } @else {
+                        Load More Locations
+                    }
+                </button>
+            }
+            </section>
+        }
+        
+        @if (schoolSearchResults().length > 0) {
+            <section>
+            <h3>Schools</h3>
+
+            @for (school of schoolSearchResults(); track school._id) {
+                <button type="button" class="search-result">
+                    <span>{{ school.school_name }}</span>
+
+                    <span>
+                    {{ school.address.location.city }},
+                    {{ school.address.location.state }}
+                    </span>
+                </button>
+            }
+
+            @if (
+            paginationResults()?.publicHasMore ||
+            paginationResults()?.privateHasMore
+            ) {
+                <button
+                type="button"
+                class="load-more-results"
+                [disabled]="loadingMoreSchools()"
+                (click)="onLoadMoreSchools()"
+                >
+                    @if (loadingMoreSchools()) {
+                        Loading...
+                    } @else {
+                        Load More Schools
+                    }
+                </button>
+            }
+            </section>
+        }
+    </div>
+  }
+
+</div>
