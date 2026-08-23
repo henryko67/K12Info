@@ -1,1 +1,14 @@
-<p>results-sidebar works!</p>
+<section class="results-sidebar" aria-labelledby="results-heading">
+  <h2 id="results-heading">Schools</h2>
+
+  <ul class="school-list">
+    @for (school of displayedSchools(); track school._id) {
+      <li>
+        <app-school-result-card
+        [school]="school"
+        (schoolSelected)="onSelectSchool($event)"
+        />
+      </li>
+    }
+  </ul>
+</section>

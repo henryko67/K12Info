@@ -31,7 +31,7 @@
             <h3>Locations</h3>
 
             @for (location of locationSearchResults(); track location._id) {
-                <button type="button" class="search-result">
+                <button type="button" class="search-result" (click)="onSelectLocation(location)">
                     {{ location.label }}
                 </button>
             }
@@ -58,7 +58,7 @@
             <h3>Schools</h3>
 
             @for (school of schoolSearchResults(); track school._id) {
-                <button type="button" class="search-result">
+                <button type="button" class="search-result" (click)="onSelectSchool(school)">
                     <span>{{ school.school_name }}</span>
 
                     <span>

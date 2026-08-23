@@ -1,1 +1,14 @@
-<p>school-result-card works!</p>
+<button
+  type="button"
+  class="school-result-card"
+  (click)="onSelect()"
+>
+  <h3>{{ school().school_name }}</h3>
+
+  <p>
+    {{ school().address.location.city }},
+    {{ school().address.location.state }}
+  </p>
+
+  <p>{{ school().sector }}</p>
+</button>

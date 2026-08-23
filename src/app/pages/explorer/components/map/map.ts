@@ -2,6 +2,7 @@ import {
   AfterViewInit,
   Component,
   ElementRef,
+  OnDestroy,
   ViewChild,
   inject
 } from '@angular/core';
@@ -16,7 +17,7 @@ import * as L from 'leaflet';
   templateUrl: './map.html',
   styleUrl: './map.css'
 })
-export class Map implements AfterViewInit {
+export class Map implements AfterViewInit, OnDestroy {
 
   private explorerStore = inject(ExplorerStore);
 
@@ -24,6 +25,7 @@ export class Map implements AfterViewInit {
   mapContainer!: ElementRef<HTMLDivElement>;
 
   private map!: L.Map;
+  private resizeObserver?: ResizeObserver;
 
   ngAfterViewInit(): void {
     this.map = L.map(this.mapContainer.nativeElement).setView(
@@ -37,5 +39,18 @@ export class Map implements AfterViewInit {
         attribution: '&copy; OpenStreetMap contributors'
       }
     ).addTo(this.map);
+
+    if (typeof ResizeObserver !== 'undefined') {
+      this.resizeObserver = new ResizeObserver(() => {
+        this.map.invalidateSize({ animate: false, pan: false });
+      });
+
+      this.resizeObserver.observe(this.mapContainer.nativeElement);
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.resizeObserver?.disconnect();
+    this.map?.remove();
   }
 }

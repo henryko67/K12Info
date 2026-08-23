@@ -16,6 +16,8 @@ import { forkJoin } from 'rxjs';
 
 import { SearchApi } from '../../services/search-api';
 import { ExplorerStore } from '../../services/explorer-store';
+import { SchoolSearchResult } from '../../models/school-search-result';
+import { LocationSearchResult } from '../../models/location-search-result';
 
 @Component({
   imports: [ReactiveFormsModule],
@@ -176,5 +178,16 @@ export class SearchBar {
         this.loadingMoreSchools.set(false);
       }
     });
+  }
+
+  onSelectLocation(location: LocationSearchResult): void {
+    console.log(location._id);
+    this.resultsOpen.set(false);
+  }
+
+  onSelectSchool(school: SchoolSearchResult): void {
+    this.explorerStore.addDisplayedSchool(school);
+    this.explorerStore.selectSchool(school);
+    this.resultsOpen.set(false);
   }
 }

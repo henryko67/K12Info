@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 
 import { SearchBar } from './components/search-bar/search-bar';
 import { FilterPanel } from './components/filter-panel/filter-panel';
@@ -22,5 +22,6 @@ import { ExplorerStore } from './services/explorer-store';
   styleUrl: './explorer.css'
 })
 export class Explorer {
-  
+  private readonly explorerStore = inject(ExplorerStore);
+  readonly previewOpen = this.explorerStore.previewOpen;
 }

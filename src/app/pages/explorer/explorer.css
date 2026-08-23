@@ -40,9 +40,31 @@ h1 {
   z-index: 0;
   isolation: isolate;
   display: grid;
-  grid-template-columns: minmax(30rem, 1fr) minmax(15rem, 19rem) minmax(18rem, 23rem);
+  grid-template-columns: minmax(30rem, 1fr) minmax(18rem, 23rem);
   min-height: 0;
   overflow: hidden;
+  transition: grid-template-columns 180ms ease;
+}
+
+.explorer-content.preview-open {
+  grid-template-columns: minmax(30rem, 1fr) minmax(15rem, 19rem) minmax(18rem, 23rem);
+}
+
+.explorer-content > app-map {
+  grid-column: 1;
+}
+
+.explorer-content > app-school-preview {
+  grid-column: 2;
+  animation: preview-enter 180ms ease-out;
+}
+
+.explorer-content > app-results-sidebar {
+  grid-column: 2;
+}
+
+.explorer-content.preview-open > app-results-sidebar {
+  grid-column: 3;
 }
 
 .explorer-content > * {
@@ -52,7 +74,10 @@ h1 {
 
 @media (max-width: 75rem) {
   .explorer-content {
-    position: relative;
+    grid-template-columns: minmax(0, 1fr) minmax(18rem, 30%);
+  }
+
+  .explorer-content.preview-open {
     grid-template-columns: minmax(0, 1fr) minmax(18rem, 30%);
   }
 
@@ -73,7 +98,8 @@ h1 {
     box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.18);
   }
 
-  .explorer-content app-results-sidebar {
+  .explorer-content app-results-sidebar,
+  .explorer-content.preview-open > app-results-sidebar {
     grid-column: 2;
     grid-row: 1;
   }
@@ -95,8 +121,13 @@ h1 {
   .explorer-content {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: minmax(24rem, 58dvh) auto auto;
+    grid-template-rows: minmax(24rem, 58dvh) auto;
     overflow: visible;
+  }
+
+  .explorer-content.preview-open {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(24rem, 58dvh) auto auto;
   }
 
   .explorer-content app-map,
@@ -119,7 +150,13 @@ h1 {
     border-width: 1px 0 0;
   }
 
-  .explorer-content app-results-sidebar {
+  .explorer-content app-results-sidebar,
+  .explorer-content.preview-open > app-results-sidebar {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .explorer-content.preview-open app-results-sidebar {
     grid-row: 3;
   }
 }
@@ -127,5 +164,27 @@ h1 {
 @media (max-width: 32rem) {
   .explorer-controls {
     grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@keyframes preview-enter {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .explorer-content {
+    transition: none;
+  }
+
+  .explorer-content app-school-preview {
+    animation: none;
   }
 }

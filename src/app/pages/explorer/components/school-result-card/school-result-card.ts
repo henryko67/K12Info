@@ -1,9 +1,17 @@
-import { Component } from '@angular/core';
+import { Component, input, output } from '@angular/core';
+import { SchoolSearchResult } from '../../models/school-search-result';
 
 @Component({
-  imports: [],
   selector: 'app-school-result-card',
-  styleUrl: './school-result-card.css',
+  imports: [],
   templateUrl: './school-result-card.html',
+  styleUrl: './school-result-card.css'
 })
-export class SchoolResultCard {}
+export class SchoolResultCard {
+  school = input.required<SchoolSearchResult>();
+  schoolSelected = output<SchoolSearchResult>();
+
+  onSelect(): void {
+    this.schoolSelected.emit(this.school());
+  }
+}

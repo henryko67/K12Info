@@ -1,1 +1,21 @@
-<p>school-preview works!</p>
+@if (selectedSchool(); as school) {
+    <section class="school-preview">
+        <button
+        type="button"
+        class="preview-close"
+        aria-label="Close school preview"
+        (click)="closePreview()"
+        >
+        ×
+        </button>
+
+        <h3>{{ school.school_name }}</h3>
+
+        <p>
+        {{ school.address.location.city }},
+        {{ school.address.location.state }}
+        </p>
+
+        <p>{{ school.sector }}</p>
+    </section>
+}

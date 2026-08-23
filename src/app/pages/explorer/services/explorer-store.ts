@@ -52,6 +52,7 @@ export class ExplorerStore {
 
   selectSchool(school: SchoolSearchResult): void {
     this.selectedSchool.set(school);
+    this.openPreview();
   }
 
   clearSelectedSchool(): void {
@@ -83,5 +84,29 @@ export class ExplorerStore {
         ...response.pagination
       }
     })
+  }
+
+  displayedSchools = signal<SchoolSearchResult[]>([]);
+
+  addDisplayedSchool(school: SchoolSearchResult): void {
+    this.displayedSchools.set([school]);
+  }
+
+  setDisplayedSchools(schools: SchoolSearchResult[]): void {
+    this.displayedSchools.set(schools);
+  }
+
+  clearDisplayedSchools(): void {
+    this.displayedSchools.set([]);
+  }
+
+  previewOpen = signal(false);
+
+  openPreview(): void {
+    this.previewOpen.set(true);
+  }
+
+  closePreview(): void {
+    this.previewOpen.set(false);
   }
 }

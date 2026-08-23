@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
+import { ExplorerStore } from '../../services/explorer-store';
 
 @Component({
   imports: [],
@@ -6,4 +7,12 @@ import { Component } from '@angular/core';
   styleUrl: './school-preview.css',
   templateUrl: './school-preview.html',
 })
-export class SchoolPreview {}
+export class SchoolPreview {
+  private readonly explorerStore = inject(ExplorerStore);
+
+  readonly selectedSchool = this.explorerStore.selectedSchool;
+
+  closePreview(): void {
+    this.explorerStore.closePreview();
+  }
+}
