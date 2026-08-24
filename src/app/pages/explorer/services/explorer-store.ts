@@ -1,7 +1,7 @@
 import { computed, Service, signal } from '@angular/core';
 import { SearchResponse } from '../models/search-response';
-import { SchoolSearchResult } from '../models/school-search-result';
 import { SearchMoreResponse } from '../models/saerch-more-response';
+import { DisplaySchool } from '../models/display-school';
 
 @Service({
   autoProvided: false
@@ -48,9 +48,9 @@ export class ExplorerStore {
     this.searchResponse.set(null);
   }
 
-  selectedSchool = signal<SchoolSearchResult | null>(null);
+  selectedSchool = signal<DisplaySchool | null>(null);
 
-  selectSchool(school: SchoolSearchResult): void {
+  selectSchool(school: DisplaySchool): void {
     this.selectedSchool.set(school);
     this.openPreview();
   }
@@ -86,13 +86,13 @@ export class ExplorerStore {
     })
   }
 
-  displayedSchools = signal<SchoolSearchResult[]>([]);
+  displayedSchools = signal<DisplaySchool[]>([]);
 
-  addDisplayedSchool(school: SchoolSearchResult): void {
+  addDisplayedSchool(school: DisplaySchool): void {
     this.displayedSchools.set([school]);
   }
 
-  setDisplayedSchools(schools: SchoolSearchResult[]): void {
+  setDisplayedSchools(schools: DisplaySchool[]): void {
     this.displayedSchools.set(schools);
   }
 

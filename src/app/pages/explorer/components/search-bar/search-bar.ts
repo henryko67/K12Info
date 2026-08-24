@@ -15,6 +15,7 @@ import {
 import { forkJoin } from 'rxjs';
 
 import { SearchApi } from '../../services/search-api';
+import { LocationsApi } from '../../services/locations-api';
 import { ExplorerStore } from '../../services/explorer-store';
 import { SchoolSearchResult } from '../../models/school-search-result';
 import { LocationSearchResult } from '../../models/location-search-result';
@@ -180,9 +181,25 @@ export class SearchBar {
     });
   }
 
+  //location stuff
+
+  private readonly locationsApi = inject(LocationsApi);
+
   onSelectLocation(location: LocationSearchResult): void {
-    console.log(location._id);
     this.resultsOpen.set(false);
+
+    this.locationsApi
+      .getSchoolsByLocation(location._id)
+      .subscribe(response => {
+        const schools = [
+          ...response.publicResults,
+          ...response.privateResults
+        ];
+
+        this.explorerStore.setDisplayedSchools(schools);
+        this.explorerStore.clearSelectedSchool();
+        this.explorerStore.closePreview();
+      });
   }
 
   onSelectSchool(school: SchoolSearchResult): void {

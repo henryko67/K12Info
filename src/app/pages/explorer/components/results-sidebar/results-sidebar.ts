@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { ExplorerStore } from '../../services/explorer-store';
 import { SchoolResultCard } from '../school-result-card/school-result-card';
-import { SchoolSearchResult } from '../../models/school-search-result';
+import { DisplaySchool } from '../../models/display-school';
 
 @Component({
   selector: 'app-results-sidebar',
@@ -14,7 +14,7 @@ export class ResultsSidebar {
 
   readonly displayedSchools = this.explorerStore.displayedSchools;
 
-  onSelectSchool(school: SchoolSearchResult): void {
+  onSelectSchool(school: DisplaySchool): void {
     this.explorerStore.selectSchool(school);
   }
 }

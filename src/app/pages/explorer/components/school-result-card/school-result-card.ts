@@ -1,5 +1,5 @@
 import { Component, input, output } from '@angular/core';
-import { SchoolSearchResult } from '../../models/school-search-result';
+import { DisplaySchool } from '../../models/display-school';
 
 @Component({
   selector: 'app-school-result-card',
@@ -8,8 +8,8 @@ import { SchoolSearchResult } from '../../models/school-search-result';
   styleUrl: './school-result-card.css'
 })
 export class SchoolResultCard {
-  school = input.required<SchoolSearchResult>();
-  schoolSelected = output<SchoolSearchResult>();
+  school = input.required<DisplaySchool>();
+  schoolSelected = output<DisplaySchool>();
 
   onSelect(): void {
     this.schoolSelected.emit(this.school());
