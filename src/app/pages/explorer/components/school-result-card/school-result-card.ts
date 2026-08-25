@@ -1,5 +1,7 @@
-import { Component, input, output } from '@angular/core';
-import { DisplaySchool } from '../../models/display-school';
+import { Component, input, output, inject } from '@angular/core';
+import { ExplorerStore } from '../../services/explorer-store';
+
+import { ExplorerSchool } from '../../models/explorer-school';
 
 @Component({
   selector: 'app-school-result-card',
@@ -8,8 +10,12 @@ import { DisplaySchool } from '../../models/display-school';
   styleUrl: './school-result-card.css'
 })
 export class SchoolResultCard {
-  school = input.required<DisplaySchool>();
-  schoolSelected = output<DisplaySchool>();
+  school = input.required<ExplorerSchool>();
+  schoolSelected = output<ExplorerSchool>();
+
+  private readonly explorerStore = inject(ExplorerStore);
+
+  readonly selectedSchool = this.explorerStore.selectedSchool;
 
   onSelect(): void {
     this.schoolSelected.emit(this.school());

@@ -35,17 +35,20 @@ export class Map implements AfterViewInit, OnDestroy {
       disableClusteringAtZoom: 12
     });
   
-  renderMarkers(): void {
+  private renderMarkers(): void {
     this.markerClusterGroup.clearLayers();
+    this.schoolMarkers.clear();
 
     const schools = this.displayedSchools();
 
     for (const school of schools) {
       const [longitude, latitude] = school.location.coordinates;
-      const marker = L.marker([latitude, longitude]);
+      const marker = L.marker([latitude, longitude], {icon: this.normalMarkerIcon});
       marker.on('click', () => {
         this.explorerStore.selectSchool(school);
+        this.explorerStore.focusSchool(school);
       });
+      this.schoolMarkers.set(school._id, marker);
       this.markerClusterGroup.addLayer(marker);
     }
 
@@ -111,6 +114,60 @@ export class Map implements AfterViewInit, OnDestroy {
   private map!: L.Map;
   private resizeObserver?: ResizeObserver;
 
+  // Focusing on marker
+
+  readonly selectedSchool = this.explorerStore.selectedSchool;
+
+  // 1. Leaflet icon definitions
+  private readonly schoolMarkers = new globalThis.Map<string, L.Marker>();
+
+  private readonly normalMarkerIcon = L.icon({
+    iconUrl: '/markers/marker-icon.png',
+    iconRetinaUrl: '/markers/marker-icon-2x.png',
+    shadowUrl: '/markers/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    shadowSize: [41, 41],
+    shadowAnchor: [12, 41]
+  });
+
+  private readonly selectedMarkerIcon = L.icon({
+    iconUrl: '/markers/marker-icon-selected.png',
+    iconRetinaUrl: '/markers/marker-icon-2x-selected.png',
+    shadowUrl: '/markers/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    shadowSize: [41, 41],
+    shadowAnchor: [12, 41]
+  });
+
+  private updateSelectedMarker(): void {
+    const selectedSchool = this.selectedSchool();
+
+    for (const [schoolId, marker] of this.schoolMarkers) {
+      if (selectedSchool !== null && schoolId === selectedSchool._id) {
+        marker.setIcon(this.selectedMarkerIcon);
+      } else {
+        marker.setIcon(this.normalMarkerIcon);
+      }
+    }
+  }
+
+  readonly focusRequest = this.explorerStore.focusRequest;
+
+  private focusRequestedSchool(): void {
+    const request = this.focusRequest();
+
+    if (request === null) {
+      return;
+    }
+
+    const [longitude, latitude] =
+      request.school.location.coordinates;
+
+    this.map.setView([latitude, longitude], 14);
+  }
+
   ngAfterViewInit(): void {
     this.map = L.map(this.mapContainer.nativeElement, {
       center: this.initialCenter,
@@ -142,6 +199,18 @@ export class Map implements AfterViewInit, OnDestroy {
       this.renderMarkers();
     },
     { injector: this.injector });
+
+    effect(() => {
+      this.updateSelectedMarker();
+    }, 
+    { injector: this.injector });
+
+    effect(
+      () => {
+        this.focusRequestedSchool();
+      },
+      { injector: this.injector }
+    );
   }
 
   ngOnDestroy(): void {

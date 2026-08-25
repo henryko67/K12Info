@@ -1,6 +1,7 @@
 <button
   type="button"
   class="school-result-card"
+  [class.selected]="selectedSchool()?._id === school()._id"
   (click)="onSelect()"
 >
   <h3>{{ school().school_name }}</h3>

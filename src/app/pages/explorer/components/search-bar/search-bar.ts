@@ -16,6 +16,7 @@ import { forkJoin } from 'rxjs';
 
 import { SearchApi } from '../../services/search-api';
 import { LocationsApi } from '../../services/locations-api';
+import { SchoolsApi } from '../../services/schools-api';
 import { ExplorerStore } from '../../services/explorer-store';
 import { SchoolSearchResult } from '../../models/school-search-result';
 import { LocationSearchResult } from '../../models/location-search-result';
@@ -28,6 +29,7 @@ import { LocationSearchResult } from '../../models/location-search-result';
 })
 export class SearchBar {
   private readonly searchApi = inject(SearchApi);
+  private readonly schoolsApi = inject(SchoolsApi);
   private readonly explorerStore = inject(ExplorerStore);
 
   private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
@@ -203,8 +205,14 @@ export class SearchBar {
   }
 
   onSelectSchool(school: SchoolSearchResult): void {
-    this.explorerStore.addDisplayedSchool(school);
-    this.explorerStore.selectSchool(school);
     this.resultsOpen.set(false);
+
+    this.schoolsApi
+      .getSchoolById(school.sector, school._id)
+      .subscribe(fullSchool => {
+        this.explorerStore.addDisplayedSchool(fullSchool);
+        this.explorerStore.selectSchool(fullSchool);
+        this.explorerStore.focusSchool(fullSchool);
+      });
   }
 }

@@ -3,7 +3,10 @@
 
   <ul class="school-list">
     @for (school of displayedSchools(); track school._id) {
-      <li>
+      <li
+        #schoolItem
+        [attr.data-school-id]="school._id"
+      >
         <app-school-result-card
         [school]="school"
         (schoolSelected)="onSelectSchool($event)"

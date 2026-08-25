@@ -33,9 +33,18 @@
 }
 
 .school-result-card[aria-pressed='true'],
-.school-result-card.is-selected {
+.school-result-card.is-selected,
+.school-result-card.selected {
   background: var(--color-surface);
   box-shadow: inset 3px 0 0 var(--color-accent);
+}
+
+.school-result-card.selected h3 {
+  font-weight: 800;
+}
+
+.school-result-card.selected > p:not(:last-child) {
+  color: var(--color-text);
 }
 
 .school-result-card h3 {

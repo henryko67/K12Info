@@ -1,7 +1,16 @@
-import { Component, inject } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  QueryList,
+  ViewChildren,
+  effect,
+  inject,
+  Injector
+} from '@angular/core';
 import { ExplorerStore } from '../../services/explorer-store';
 import { SchoolResultCard } from '../school-result-card/school-result-card';
-import { DisplaySchool } from '../../models/display-school';
+
+import { ExplorerSchool } from '../../models/explorer-school';
 
 @Component({
   selector: 'app-results-sidebar',
@@ -11,10 +20,43 @@ import { DisplaySchool } from '../../models/display-school';
 })
 export class ResultsSidebar {
   private readonly explorerStore = inject(ExplorerStore);
+  private readonly injector = inject(Injector);
 
   readonly displayedSchools = this.explorerStore.displayedSchools;
 
-  onSelectSchool(school: DisplaySchool): void {
+  onSelectSchool(school: ExplorerSchool): void {
     this.explorerStore.selectSchool(school);
+    this.explorerStore.focusSchool(school);
+  }
+
+  readonly selectedSchool = this.explorerStore.selectedSchool;
+
+  @ViewChildren('schoolItem')
+  schoolItems!: QueryList<ElementRef<HTMLElement>>;
+
+  scrollToSelectedSchool(): void {
+    const school = this.selectedSchool();
+
+    if (school === null) {
+      return;
+    }
+
+    const item = this.schoolItems.find(element =>
+      element.nativeElement.dataset['schoolId'] === school._id
+    );
+
+    item?.nativeElement.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
+  }
+
+  ngAfterViewInit() {
+    effect(
+      () => {
+        this.scrollToSelectedSchool();
+      },
+      { injector: this.injector }
+    );
   }
 }

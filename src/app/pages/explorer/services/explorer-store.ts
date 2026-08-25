@@ -1,7 +1,8 @@
 import { computed, Service, signal } from '@angular/core';
 import { SearchResponse } from '../models/search-response';
 import { SearchMoreResponse } from '../models/saerch-more-response';
-import { DisplaySchool } from '../models/display-school';
+
+import { ExplorerSchool } from '../models/explorer-school';
 
 @Service({
   autoProvided: false
@@ -48,9 +49,9 @@ export class ExplorerStore {
     this.searchResponse.set(null);
   }
 
-  selectedSchool = signal<DisplaySchool | null>(null);
+  selectedSchool = signal<ExplorerSchool | null>(null);
 
-  selectSchool(school: DisplaySchool): void {
+  selectSchool(school: ExplorerSchool): void {
     this.selectedSchool.set(school);
     this.openPreview();
   }
@@ -86,18 +87,30 @@ export class ExplorerStore {
     })
   }
 
-  displayedSchools = signal<DisplaySchool[]>([]);
+  displayedSchools = signal<ExplorerSchool[]>([]);
 
-  addDisplayedSchool(school: DisplaySchool): void {
+  addDisplayedSchool(school: ExplorerSchool): void {
     this.displayedSchools.set([school]);
   }
 
-  setDisplayedSchools(schools: DisplaySchool[]): void {
+  setDisplayedSchools(schools: ExplorerSchool[]): void {
     this.displayedSchools.set(schools);
   }
 
   clearDisplayedSchools(): void {
     this.displayedSchools.set([]);
+  }
+
+  readonly focusRequest = signal<{
+    school: ExplorerSchool;
+    requestId: number;
+  } | null>(null);
+
+  focusSchool(school: ExplorerSchool): void {
+    this.focusRequest.set({
+      school,
+      requestId: Date.now()
+    });
   }
 
   previewOpen = signal(false);

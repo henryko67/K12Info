@@ -1,6 +1,7 @@
-import { DisplaySchool } from "./display-school";{}
+import { PublicExplorerSchool } from './public-explorer-school';
+import { PrivateExplorerSchool } from './private-explorer-school';
 
 export interface LocationSchoolsResponse {
-  publicResults: DisplaySchool[];
-  privateResults: DisplaySchool[];
+  publicResults: PublicExplorerSchool[];
+  privateResults: PrivateExplorerSchool[];
 }
