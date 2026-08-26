@@ -1,21 +1,263 @@
-@if (selectedSchool(); as school) {
-    <section class="school-preview">
-        <button
-        type="button"
-        class="preview-close"
-        aria-label="Close school preview"
-        (click)="closePreview()"
-        >
-        ×
-        </button>
+<section class="school-preview">
+  <button
+    type="button"
+    class="preview-close"
+    aria-label="Close school preview"
+    (click)="closePreview()"
+  >
+    ×
+  </button>
 
-        <h3>{{ school.school_name }}</h3>
-
-        <p>
-        {{ school.address.location.city }},
-        {{ school.address.location.state }}
+  @if (selectedSchool(); as school) {
+    <header class="preview-header">
+      <div>
+        <p class="school-sector">
+          {{ school.sector === 'public' ? 'Public school' : 'Private school' }}
         </p>
 
-        <p>{{ school.sector }}</p>
+        <h2>{{ school.school_name }}</h2>
+
+        <p class="school-classification">
+          {{ formatSchoolLevel(school) }}
+          ·
+          {{ formatSchoolType(school) }}
+        </p>
+      </div>
+    </header>
+
+    <section class="preview-section">
+      <h3>School information</h3>
+
+      <address>
+        <p>{{ school.address.location.street }}</p>
+
+        <p>
+          {{ school.address.location.city }},
+          {{ school.address.location.state }}
+          {{ school.address.location.zip }}
+        </p>
+      </address>
+
+      <p>
+        {{ school.contact?.phone ?? 'Phone unavailable' }}
+      </p>
     </section>
-}
+
+    <section class="preview-section">
+      <h3>Overview</h3>
+
+      <dl class="preview-stats">
+        <div>
+          <dt>Grades</dt>
+          <dd>
+            {{ formatGrade(school.grades?.lowest) }}
+            –
+            {{ formatGrade(school.grades?.highest) }}
+          </dd>
+        </div>
+
+        <div>
+          <dt>Students</dt>
+          <dd>
+            {{ school.enrollment?.students ?? 'Unavailable' }}
+          </dd>
+        </div>
+
+        <div>
+          <dt>Student–teacher ratio</dt>
+          <dd>
+            {{ school.enrollment?.students_per_teacher ?? 'Unavailable' }}
+          </dd>
+        </div>
+
+        @if (school.sector === 'public') {
+          <div>
+            <dt>Status</dt>
+            <dd>
+              {{ formatStatus(school.classification?.status) }}
+            </dd>
+          </div>
+        }
+      </dl>
+
+      @if (
+        school.sector === 'public' &&
+        (
+          school.classification?.status === undefined ||
+          school.classification.status <= 0
+        )
+      ) {
+        <p class="preview-warning">
+          School status is unavailable. Some information may be outdated.
+        </p>
+      }
+    </section>
+
+    @if (school.sector === 'public') {
+      <section class="preview-section">
+        <h3>School characteristics</h3>
+
+        <dl class="preview-stats">
+          <div>
+            <dt>Charter school</dt>
+            <dd>
+              {{ formatYesNo(school.classification?.charter) }}
+            </dd>
+          </div>
+
+          <div>
+            <dt>Virtual school</dt>
+            <dd>
+              {{ formatVirtual(school.classification?.virtual) }}
+            </dd>
+          </div>
+
+          <div>
+            <dt>Shared-time school</dt>
+            <dd>
+              {{ formatYesNo(school.classification?.shared_time) }}
+            </dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="preview-section">
+        <h3>Programs</h3>
+
+        <dl class="preview-stats">
+          @if (showSecondaryPrograms(school)) {
+            <div>
+              <dt>AP</dt>
+              <dd>
+                {{ formatProgramAvailability(
+                  school.program_enrollment?.ap
+                ) }}
+              </dd>
+            </div>
+
+            <div>
+              <dt>IB</dt>
+              <dd>
+                {{ formatProgramAvailability(
+                  school.program_enrollment?.ib
+                ) }}
+              </dd>
+            </div>
+
+            <div>
+              <dt>Dual enrollment</dt>
+              <dd>
+                {{ formatProgramAvailability(
+                  school.program_enrollment?.dual_enrollment
+                ) }}
+              </dd>
+            </div>
+          }
+
+          <div>
+            <dt>Gifted & talented</dt>
+            <dd>
+              {{ formatProgramAvailability(
+                school.program_enrollment?.gifted_talented
+              ) }}
+            </dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="preview-section">
+        <h3>Lunch program</h3>
+
+        <dl class="preview-stats">
+          <div>
+            <dt>National School Lunch Program</dt>
+            <dd>
+              {{ formatLunchProgram(school.lunch?.program) }}
+            </dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="preview-section preview-sources">
+        <h3>Sources</h3>
+
+        <ul>
+          <li>
+            {{ school.sources.ccd.name }}
+            ({{ school.sources.ccd.abbreviation }}, {{ school.sources.ccd.year }})
+          </li>
+
+          @if (school.sources.crdc) {
+            <li>
+              {{ school.sources.crdc.name }}
+              ({{ school.sources.crdc.abbreviation }}, {{ school.sources.crdc.year }})
+            </li>
+          }
+        </ul>
+      </section>
+    }
+
+    @if (school.sector === 'private') {
+      <section class="preview-section">
+        <h3>School profile</h3>
+
+        <dl class="preview-stats">
+          <div>
+            <dt>Religion</dt>
+            <dd>
+              {{ school.classification?.religion ?? 'Unavailable' }}
+            </dd>
+          </div>
+
+          <div>
+            <dt>Library / media center</dt>
+            <dd>
+              {{ formatLibraryMediaCenter(
+                school.facilities?.library_media_center
+              ) }}
+            </dd>
+          </div>
+
+          <div>
+            <dt>School day</dt>
+            <dd>
+              @if (school.operations?.school_day_hours !== undefined) {
+                {{ school.operations?.school_day_hours }} hours
+              } @else {
+                Unavailable
+              }
+            </dd>
+          </div>
+
+          <div>
+            <dt>School year</dt>
+            <dd>
+              @if (school.operations?.school_days_per_year !== undefined) {
+                {{ school.operations?.school_days_per_year }} days
+              } @else {
+                Unavailable
+              }
+            </dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="preview-section preview-sources">
+        <h3>Sources</h3>
+
+        <ul>
+          <li>
+            {{ school.sources.nces.name }}
+            ({{ school.sources.nces.abbreviation }}, {{ school.sources.nces.year }})
+          </li>
+        </ul>
+      </section>
+    }
+
+    <footer class="preview-actions">
+      <button type="button">
+        More details
+      </button>
+    </footer>
+  }
+</section>

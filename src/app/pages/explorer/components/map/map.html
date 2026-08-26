@@ -1,1 +1,11 @@
-<div #mapContainer class="map-container"></div>
+<div class="map-wrapper">
+  <div #mapContainer class="map-container"></div>
+
+  <button
+    type="button"
+    class="search-area-button"
+    (click)="onSearchThisArea()"
+  >
+    Search this area
+  </button>
+</div>

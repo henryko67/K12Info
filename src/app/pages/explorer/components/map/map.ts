@@ -11,6 +11,8 @@ import {
 
 import { ExplorerStore } from '../../services/explorer-store';
 
+import { MapSearchApi } from '../../services/map-search-api';
+
 import * as L from 'leaflet';
 import 'leaflet.markercluster';
 
@@ -167,6 +169,32 @@ export class Map implements AfterViewInit, OnDestroy {
 
     this.map.setView([latitude, longitude], 14);
   }
+
+  //Search area button
+
+  private readonly mapSearchApi = inject(MapSearchApi);
+
+onSearchThisArea(): void {
+  const bounds = this.map.getBounds();
+
+  const north = bounds.getNorth();
+  const south = bounds.getSouth();
+  const east = bounds.getEast();
+  const west = bounds.getWest();
+
+  this.mapSearchApi
+    .searchByBounds(north, south, east, west)
+    .subscribe(response => {
+      const schools = [
+        ...response.publicResults,
+        ...response.privateResults
+      ];
+
+      this.explorerStore.clearSelectedSchool();
+      this.explorerStore.closePreview();
+      this.explorerStore.setDisplayedSchools(schools);
+    });
+}
 
   ngAfterViewInit(): void {
     this.map = L.map(this.mapContainer.nativeElement, {
