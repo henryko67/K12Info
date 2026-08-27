@@ -1,17 +1,35 @@
-<section class="results-sidebar" aria-labelledby="results-heading">
-  <h2 id="results-heading">Schools</h2>
+<section
+  class="results-sidebar"
+  [class.collapsed]="!isOpen()"
+  aria-labelledby="results-heading"
+>
+  <header class="results-header">
+    <h2 id="results-heading">Schools</h2>
 
-  <ul class="school-list">
-    @for (school of displayedSchools(); track school._id) {
-      <li
-        #schoolItem
-        [attr.data-school-id]="school._id"
-      >
-        <app-school-result-card
-        [school]="school"
-        (schoolSelected)="onSelectSchool($event)"
-        />
-      </li>
-    }
-  </ul>
+    <button
+      type="button"
+      class="results-toggle"
+      [attr.aria-expanded]="isOpen()"
+      [attr.aria-label]="isOpen() ? 'Collapse school results' : 'Expand school results'"
+      (click)="toggleSidebar()"
+    >
+      <span class="results-toggle-icon" aria-hidden="true"></span>
+    </button>
+  </header>
+
+  @if (isOpen()) {
+    <ul class="school-list">
+      @for (school of displayedSchools(); track school._id) {
+        <li
+          #schoolItem
+          [attr.data-school-id]="school._id"
+        >
+          <app-school-result-card
+          [school]="school"
+          (schoolSelected)="onSelectSchool($event)"
+          />
+        </li>
+      }
+    </ul>
+  }
 </section>

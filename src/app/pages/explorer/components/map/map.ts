@@ -28,7 +28,8 @@ export class Map implements AfterViewInit, OnDestroy {
 
   private explorerStore = inject(ExplorerStore);
 
-  readonly displayedSchools = this.explorerStore.displayedSchools;
+  //readonly displayedSchools = this.explorerStore.displayedSchools;
+  readonly displayedSchools = this.explorerStore.filteredSchools;
 
   //Marker cluster code
 

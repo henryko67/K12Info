@@ -122,4 +122,353 @@ export class ExplorerStore {
   closePreview(): void {
     this.previewOpen.set(false);
   }
+
+  resultsSidebarOpen = signal(true);
+
+  toggleResultsSidebar(): void {
+    this.resultsSidebarOpen.update(open => !open);
+  }
+
+  readonly selectedLevels = signal<number[]>([]);
+  readonly apOnly = signal(false);
+  readonly ibOnly = signal(false);
+
+  publicFilters = signal({
+    levels: [] as number[],
+    maxStudentTeacherRatio: null as number | null,
+    apOnly: false,
+    ibOnly: false,
+    giftedOnly: false,
+    dualEnrollmentOnly: false,
+    charterOnly: false,
+    lunchProgram: null as number | null,
+    schoolTypes: [] as number[]
+  });
+
+  privateFilters = signal({
+    levels: [] as number[],
+    maxStudentTeacherRatio: null as number | null,
+    religiousAffiliations: [] as number[],
+    schoolTypes: [] as number[]
+  });
+
+  sectorFilter = signal<'all' | 'public' | 'private'>('all');
+
+  setSectorFilter(value: 'all' | 'public' | 'private'): void {
+    console.log("Explorer store sector field set");
+    this.sectorFilter.set(value);
+  }
+
+  setPublicApOnly(value: boolean): void {
+    this.publicFilters.update(filters => ({
+      ...filters,
+      apOnly: value
+    }));
+  }
+
+  setPublicIbOnly(value: boolean): void {
+    this.publicFilters.update(filters => ({
+      ...filters,
+      ibOnly: value
+    }));
+  }
+
+  setPublicGiftedOnly(value: boolean): void {
+    this.publicFilters.update(filters => ({
+      ...filters,
+      giftedOnly: value
+    }));
+  }
+
+  setPublicDualEnrollmentOnly(value: boolean): void {
+    this.publicFilters.update(filters => ({
+      ...filters,
+      dualEnrollmentOnly: value
+    }));
+  }
+
+  setPublicCharterOnly(value: boolean): void {
+    this.publicFilters.update(filters => ({
+      ...filters,
+      charterOnly: value
+    }));
+  }
+
+  setPublicLunchProgram(value: number | null): void {
+    this.publicFilters.update(filters => ({
+      ...filters,
+      lunchProgram: value
+    }));
+  }
+
+  setPublicMaxStudentTeacherRatio(
+    value: number | null
+  ): void {
+    this.publicFilters.update(filters => ({
+      ...filters,
+      maxStudentTeacherRatio: value
+    }));
+  }
+
+  setPrivateMaxStudentTeacherRatio(
+    value: number | null
+  ): void {
+    this.privateFilters.update(filters => ({
+      ...filters,
+      maxStudentTeacherRatio: value
+    }));
+  }
+
+  togglePublicLevel(level: number): void {
+    this.publicFilters.update(filters => {
+      const exists = filters.levels.includes(level);
+
+      return {
+        ...filters,
+        levels: exists
+          ? filters.levels.filter(value => value !== level)
+          : [...filters.levels, level]
+      };
+    });
+  }
+
+  togglePublicSchoolType(type: number): void {
+    this.publicFilters.update(filters => {
+      const exists = filters.schoolTypes.includes(type);
+
+      return {
+        ...filters,
+        schoolTypes: exists
+          ? filters.schoolTypes.filter(value => value !== type)
+          : [...filters.schoolTypes, type]
+      };
+    });
+  }
+
+  togglePrivateLevel(level: number): void {
+    this.privateFilters.update(filters => {
+      const exists = filters.levels.includes(level);
+
+      return {
+        ...filters,
+        levels: exists
+          ? filters.levels.filter(value => value !== level)
+          : [...filters.levels, level]
+      };
+    });
+  }
+
+  togglePrivateSchoolType(type: number): void {
+    this.privateFilters.update(filters => {
+      const exists = filters.schoolTypes.includes(type);
+
+      return {
+        ...filters,
+        schoolTypes: exists
+          ? filters.schoolTypes.filter(value => value !== type)
+          : [...filters.schoolTypes, type]
+      };
+    });
+  }
+
+  togglePrivateReligiousAffiliation(
+  affiliation: number
+  ): void {
+    this.privateFilters.update(filters => {
+      const exists =
+        filters.religiousAffiliations.includes(affiliation);
+
+      return {
+        ...filters,
+        religiousAffiliations: exists
+          ? filters.religiousAffiliations.filter(
+              value => value !== affiliation
+            )
+          : [
+              ...filters.religiousAffiliations,
+              affiliation
+            ]
+      };
+    });
+  }
+
+  clearPublicFilters(): void {
+    this.publicFilters.set({
+      levels: [],
+      maxStudentTeacherRatio: null,
+      apOnly: false,
+      ibOnly: false,
+      giftedOnly: false,
+      dualEnrollmentOnly: false,
+      charterOnly: false,
+      lunchProgram: null,
+      schoolTypes: []
+    });
+  }
+
+  clearPrivateFilters(): void {
+    this.privateFilters.set({
+      levels: [],
+      maxStudentTeacherRatio: null,
+      religiousAffiliations: [],
+      schoolTypes: []
+    });
+  }
+
+  clearAllFilters(): void {
+    this.sectorFilter.set('all');
+
+    this.clearPublicFilters();
+    this.clearPrivateFilters();
+  }
+
+  readonly filteredSchools = computed(() => {
+    const schools = this.displayedSchools();
+
+    const sector = this.sectorFilter();
+    const publicFilters = this.publicFilters();
+    const privateFilters = this.privateFilters();
+
+    return schools.filter(school => {
+      // Sector filter
+      if (
+        sector !== 'all' &&
+        school.sector !== sector
+      ) {
+        return false;
+      }
+
+      // Public-school filters
+      if (school.sector === 'public') {
+        if (
+          publicFilters.levels.length > 0 &&
+          (
+            school.classification?.level === undefined ||
+            !publicFilters.levels.includes(
+              school.classification.level
+            )
+          )
+        ) {
+          return false;
+        }
+
+        if (
+          publicFilters.maxStudentTeacherRatio !== null &&
+          (
+            school.enrollment?.students_per_teacher === undefined ||
+            school.enrollment.students_per_teacher >
+              publicFilters.maxStudentTeacherRatio
+          )
+        ) {
+          return false;
+        }
+
+        if (
+          publicFilters.apOnly &&
+          (school.program_enrollment?.ap ?? -1) < 0
+        ) {
+          return false;
+        }
+
+        if (
+          publicFilters.ibOnly &&
+          (school.program_enrollment?.ib ?? -1) < 0
+        ) {
+          return false;
+        }
+
+        if (
+          publicFilters.giftedOnly &&
+          (school.program_enrollment?.gifted_talented ?? -1) < 0
+        ) {
+          return false;
+        }
+
+        if (
+          publicFilters.dualEnrollmentOnly &&
+          (school.program_enrollment?.dual_enrollment ?? -1) < 0
+        ) {
+          return false;
+        }
+
+        if (
+          publicFilters.charterOnly &&
+          school.classification?.charter !== 1
+        ) {
+          return false;
+        }
+
+        if (
+          publicFilters.lunchProgram !== null &&
+          school.lunch?.program !== publicFilters.lunchProgram
+        ) {
+          return false;
+        }
+
+        if (
+          publicFilters.schoolTypes.length > 0 &&
+          (
+            school.classification?.type === undefined ||
+            !publicFilters.schoolTypes.includes(
+              school.classification.type
+            )
+          )
+        ) {
+          return false;
+        }
+      }
+
+      // Private-school filters
+      if (school.sector === 'private') {
+        if (
+          privateFilters.levels.length > 0 &&
+          (
+            school.classification?.level === undefined ||
+            !privateFilters.levels.includes(
+              school.classification.level
+            )
+          )
+        ) {
+          return false;
+        }
+
+        if (
+          privateFilters.maxStudentTeacherRatio !== null &&
+          (
+            school.enrollment?.students_per_teacher === undefined ||
+            school.enrollment.students_per_teacher >
+              privateFilters.maxStudentTeacherRatio
+          )
+        ) {
+          return false;
+        }
+
+        if (
+          privateFilters.religiousAffiliations.length > 0 &&
+          (
+            school.classification?.religious_affiliation === undefined ||
+            !privateFilters.religiousAffiliations.includes(
+              school.classification.religious_affiliation
+            )
+          )
+        ) {
+          return false;
+        }
+
+        if (
+          privateFilters.schoolTypes.length > 0 &&
+          (
+            school.classification?.type === undefined ||
+            !privateFilters.schoolTypes.includes(
+              school.classification.type
+            )
+          )
+        ) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  });
 }

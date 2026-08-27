@@ -24,4 +24,5 @@ import { ExplorerStore } from './services/explorer-store';
 export class Explorer {
   private readonly explorerStore = inject(ExplorerStore);
   readonly previewOpen = this.explorerStore.previewOpen;
+  readonly resultsSidebarOpen = this.explorerStore.resultsSidebarOpen;
 }

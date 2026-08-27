@@ -1,1 +1,265 @@
-<p>filter-panel works!</p>
+<section class="filter-panel">
+  <button
+    type="button"
+    class="filter-toggle"
+    (click)="togglePanel()"
+    [attr.aria-expanded]="isOpen()"
+  >
+    Filters
+  </button>
+
+  @if (isOpen()) {
+    <div class="filter-content">
+
+      <section class="filter-section">
+        <h3>School sector</h3>
+
+        <label>
+          <input
+            type="radio"
+            name="sector"
+            [checked]="sectorFilter() === 'all'"
+            (change)="setSector('all')"
+          />
+          All schools
+        </label>
+
+        <label>
+          <input
+            type="radio"
+            name="sector"
+            [checked]="sectorFilter() === 'public'"
+            (change)="setSector('public')"
+          />
+          Public schools
+        </label>
+
+        <label>
+          <input
+            type="radio"
+            name="sector"
+            [checked]="sectorFilter() === 'private'"
+            (change)="setSector('private')"
+          />
+          Private schools
+        </label>
+      </section>
+
+      <section class="filter-section">
+        <h3>Student–teacher ratio</h3>
+
+        <label>
+          Maximum students per teacher
+
+          <input
+            type="number"
+            min="1"
+            step="1"
+            (input)="setMaxRatio($any($event.target).value)"
+          />
+        </label>
+      </section>
+
+      @if (sectorFilter() !== 'private') {
+        <section class="filter-section">
+          <h3>Public school programs</h3>
+
+          <label>
+            <input
+              type="checkbox"
+              [checked]="publicFilters().apOnly"
+              (change)="setApOnly($any($event.target).checked)"
+            />
+            Offers AP
+          </label>
+
+          <label>
+            <input
+              type="checkbox"
+              [checked]="publicFilters().ibOnly"
+              (change)="setIbOnly($any($event.target).checked)"
+            />
+            Offers IB
+          </label>
+
+          <label>
+            <input
+              type="checkbox"
+              [checked]="publicFilters().giftedOnly"
+              (change)="setGiftedOnly($any($event.target).checked)"
+            />
+            Gifted & talented
+          </label>
+
+          <label>
+            <input
+              type="checkbox"
+              [checked]="publicFilters().dualEnrollmentOnly"
+              (change)="setDualEnrollmentOnly($any($event.target).checked)"
+            />
+            Dual enrollment
+          </label>
+
+          <label>
+            <input
+              type="checkbox"
+              [checked]="publicFilters().charterOnly"
+              (change)="setCharterOnly($any($event.target).checked)"
+            />
+            Charter schools only
+          </label>
+        </section>
+
+        <section class="filter-section">
+          <h3>Public school level</h3>
+
+          <label>
+            <input
+              type="checkbox"
+              [checked]="publicFilters().levels.includes(0)"
+              (change)="togglePublicLevel(0)"
+            />
+            Pre-K
+          </label>
+
+          <label>
+            <input
+              type="checkbox"
+              [checked]="publicFilters().levels.includes(1)"
+              (change)="togglePublicLevel(1)"
+            />
+            Primary
+          </label>
+
+          <label>
+            <input
+              type="checkbox"
+              [checked]="publicFilters().levels.includes(2)"
+              (change)="togglePublicLevel(2)"
+            />
+            Middle
+          </label>
+
+          <label>
+            <input
+              type="checkbox"
+              [checked]="publicFilters().levels.includes(3)"
+              (change)="togglePublicLevel(3)"
+            />
+            High
+          </label>
+
+          <label>
+            <input
+              type="checkbox"
+              [checked]="publicFilters().levels.includes(7)"
+              (change)="togglePublicLevel(7)"
+            />
+            Secondary
+          </label>
+        </section>
+
+        <section class="filter-section">
+          <h3>Lunch program</h3>
+
+          <select
+            (change)="setLunchProgram($any($event.target).value)"
+          >
+            <option value="">Any</option>
+            <option value="0">Not participating</option>
+            <option value="1">Participating</option>
+            <option value="2">CEP</option>
+            <option value="3">Provision 1</option>
+            <option value="4">Provision 2</option>
+            <option value="5">Provision 3</option>
+          </select>
+        </section>
+      }
+
+      @if (sectorFilter() !== 'public') {
+        <section class="filter-section">
+          <h3>Private school level</h3>
+
+          <label>
+            <input
+              type="checkbox"
+              [checked]="privateFilters().levels.includes(1)"
+              (change)="togglePrivateLevel(1)"
+            />
+            Elementary
+          </label>
+
+          <label>
+            <input
+              type="checkbox"
+              [checked]="privateFilters().levels.includes(7)"
+              (change)="togglePrivateLevel(7)"
+            />
+            Secondary
+          </label>
+
+          <label>
+            <input
+              type="checkbox"
+              [checked]="privateFilters().levels.includes(8)"
+              (change)="togglePrivateLevel(8)"
+            />
+            Combined
+          </label>
+        </section>
+
+        <section class="filter-section">
+            <h3>Religious affiliation</h3>
+
+            <label>
+                <input
+                type="checkbox"
+                [checked]="
+                    privateFilters()
+                    .religiousAffiliations
+                    .includes(1)
+                "
+                (change)="toggleReligiousAffiliation(1)"
+                />
+                Catholic
+            </label>
+
+            <label>
+                <input
+                type="checkbox"
+                [checked]="
+                    privateFilters()
+                    .religiousAffiliations
+                    .includes(2)
+                "
+                (change)="toggleReligiousAffiliation(2)"
+                />
+                Other religious
+            </label>
+
+            <label>
+                <input
+                type="checkbox"
+                [checked]="
+                    privateFilters()
+                    .religiousAffiliations
+                    .includes(3)
+                "
+                (change)="toggleReligiousAffiliation(3)"
+                />
+                Nonsectarian
+            </label>
+            </section>
+      }
+
+      <footer class="filter-actions">
+        <button
+          type="button"
+          (click)="clearFilters()"
+        >
+          Reset filters
+        </button>
+      </footer>
+    </div>
+  }
+</section>

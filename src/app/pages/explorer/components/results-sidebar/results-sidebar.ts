@@ -22,7 +22,13 @@ export class ResultsSidebar {
   private readonly explorerStore = inject(ExplorerStore);
   private readonly injector = inject(Injector);
 
-  readonly displayedSchools = this.explorerStore.displayedSchools;
+  //readonly displayedSchools = this.explorerStore.displayedSchools;
+  readonly displayedSchools = this.explorerStore.filteredSchools;
+  readonly isOpen = this.explorerStore.resultsSidebarOpen;
+
+  toggleSidebar(): void {
+    this.explorerStore.toggleResultsSidebar();
+  }
 
   onSelectSchool(school: ExplorerSchool): void {
     this.explorerStore.selectSchool(school);

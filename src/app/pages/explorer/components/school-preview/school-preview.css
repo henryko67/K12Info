@@ -170,9 +170,9 @@
 
 .preview-actions {
   position: sticky;
-  bottom: -1rem;
+  bottom: 0;
   margin: 1rem -1rem -1rem;
-  padding: 0.75rem 1rem 1rem;
+  padding: 0.75rem 1rem max(1rem, env(safe-area-inset-bottom));
   background: var(--color-surface-raised);
   border-top: 1px solid var(--color-border);
 }
@@ -203,7 +203,18 @@
 
 @media (max-width: 48rem) {
   :host {
+    height: 100%;
+    min-height: 0;
+    max-height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
     border-left: 0;
+  }
+
+  .school-preview {
+    min-height: 0;
   }
 
   .preview-stats > div {
