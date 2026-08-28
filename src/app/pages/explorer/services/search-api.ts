@@ -2,7 +2,7 @@ import { Service, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { SearchResponse } from '../models/search-response';
-import { SearchMoreResponse } from '../models/saerch-more-response';
+import { SearchMoreResponse } from '../models/search-more-response';
 
 @Service()
 export class SearchApi {

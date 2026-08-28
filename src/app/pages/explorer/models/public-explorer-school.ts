@@ -5,13 +5,13 @@ export interface PublicExplorerSchool
 
   sector: 'public';
 
-  ids?: {
-    school_id?: string;
-    ncessch?: string;
-    ncessch_num?: number;
-    leaid?: string;
-    state_leaid?: string;
-    seasch?: string;
+  ids: {
+    school_id: string;
+    ncessch: string;
+    ncessch_num: number;
+    leaid: string;
+    state_leaid: string;
+    seasch: string;
   };
 
   address: ExplorerSchoolBase['address'] & {

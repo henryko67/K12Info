@@ -5,9 +5,9 @@ export interface PrivateExplorerSchool
 
   sector: 'private';
 
-  ids?: {
-    school_id?: string;
-    nces_id?: string;
+  ids: {
+    school_id: string;
+    nces_id: string;
   };
 
   classification?: ExplorerSchoolBase['classification'] & {

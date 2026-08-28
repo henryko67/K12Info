@@ -1,8 +1,9 @@
 import { computed, Service, signal } from '@angular/core';
 import { SearchResponse } from '../models/search-response';
-import { SearchMoreResponse } from '../models/saerch-more-response';
+import { SearchMoreResponse } from '../models/search-more-response';
 
 import { ExplorerSchool } from '../models/explorer-school';
+import { SchoolDetailsResponse } from '../models/school-details-response';
 
 @Service({
   autoProvided: false
@@ -54,6 +55,8 @@ export class ExplorerStore {
   selectSchool(school: ExplorerSchool): void {
     this.selectedSchool.set(school);
     this.openPreview();
+    this.schoolDetails.set(null);
+    this.detailsOpen.set(false);
   }
 
   clearSelectedSchool(): void {
@@ -471,4 +474,24 @@ export class ExplorerStore {
       return true;
     });
   });
+
+  readonly schoolDetails = signal<SchoolDetailsResponse | null>(null);
+
+  setSchoolDetails(details: SchoolDetailsResponse): void {
+    this.schoolDetails.set(details);
+  }
+
+  clearSchoolDetails(): void {
+    this.schoolDetails.set(null);
+  }
+
+  detailsOpen = signal(false);
+
+  openDetails(): void {
+    this.detailsOpen.set(true);
+  }
+
+  closeDetails(): void {
+    this.detailsOpen.set(false);
+  }
 }

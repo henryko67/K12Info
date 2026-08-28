@@ -254,10 +254,204 @@
       </section>
     }
 
+    @if (
+      school.sector === 'public' &&
+      detailsOpen() &&
+      schoolDetails();
+      as details
+    ) {
+      <section class="preview-section">
+        <h3>Teachers & staff</h3>
+
+        <dl class="preview-stats">
+          <div>
+            <dt>Teachers</dt>
+            <dd>
+              {{ formatFte(details.teachersStaff?.teachers.fte) }}
+            </dd>
+          </div>
+
+          <div>
+            <dt>Certified teachers</dt>
+            <dd>
+              {{ formatFte(details.teachersStaff?.teachers.certified_fte) }}
+            </dd>
+          </div>
+
+          <div>
+            <dt>Uncertified teachers</dt>
+            <dd>
+              {{ formatFte(details.teachersStaff?.teachers.uncertified_fte) }}
+            </dd>
+          </div>
+
+          <div>
+            <dt>Certified teachers</dt>
+            <dd>
+              @if (
+                details.teachersStaff?.teachers.certified_pct !== undefined &&
+                details.teachersStaff.teachers.certified_pct >= 0
+              ) {
+                {{ details.teachersStaff.teachers.certified_pct }}%
+              } @else {
+                Unavailable
+              }
+            </dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="preview-section">
+        <h3>Student support staff</h3>
+
+        <dl class="preview-stats">
+          <div>
+            <dt>Counselors</dt>
+            <dd>
+              {{
+                formatFte(
+                  details.teachersStaff?.support_staff.counselors_fte
+                )
+              }}
+            </dd>
+          </div>
+
+          <div>
+            <dt>Psychologists</dt>
+            <dd>
+              {{
+                formatFte(
+                  details.teachersStaff?.support_staff.psychologists_fte
+                )
+              }}
+            </dd>
+          </div>
+
+          <div>
+            <dt>Social workers</dt>
+            <dd>
+              {{
+                formatFte(
+                  details.teachersStaff?.support_staff.social_workers_fte
+                )
+              }}
+            </dd>
+          </div>
+
+          <div>
+            <dt>Nurses</dt>
+            <dd>
+              {{
+                formatFte(
+                  details.teachersStaff?.support_staff.nurses_fte
+                )
+              }}
+            </dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="preview-section">
+        <h3>Safety staff</h3>
+
+        <dl class="preview-stats">
+          <div>
+            <dt>Security guards</dt>
+            <dd>
+              {{
+                formatFte(
+                  details.teachersStaff?.safety_staff.security_guard_fte
+                )
+              }}
+            </dd>
+          </div>
+
+          <div>
+            <dt>Law enforcement officers</dt>
+            <dd>
+              {{
+                formatFte(
+                  details.teachersStaff?.safety_staff.law_enforcement_fte
+                )
+              }}
+            </dd>
+          </div>
+        </dl>
+      </section>
+
+      @if (details.discipline) {
+        <section class="preview-section">
+          <h3>Discipline incidents</h3>
+
+          <dl class="preview-stats">
+            <div>
+              <dt>Suspension instances</dt>
+              <dd>
+                {{ formatCount(details.discipline.suspensions.instances) }}
+              </dd>
+            </div>
+
+            @if (showPreschoolData(school)) {
+              <div>
+                <dt>Preschool suspension instances</dt>
+                <dd>
+                  {{
+                    formatCount(
+                      details.discipline.suspensions.preschool_instances
+                    )
+                  }}
+                </dd>
+              </div>
+            }
+
+            <div>
+              <dt>Corporal punishment instances</dt>
+              <dd>
+                {{
+                  formatCount(
+                    details.discipline.corporal_punishment.instances
+                  )
+                }}
+              </dd>
+            </div>
+
+            @if (showPreschoolData(school)) {
+              <div>
+                <dt>Preschool corporal punishment instances</dt>
+                <dd>
+                  {{
+                    formatCount(
+                      details.discipline
+                        .corporal_punishment
+                        .preschool_instances
+                    )
+                  }}
+                </dd>
+              </div>
+            }
+          </dl>
+        </section>
+      }
+    }
+
     <footer class="preview-actions">
-      <button type="button">
-        More details
-      </button>
+      @if (school.sector === 'public') {
+        @if (detailsOpen()) {
+          <button
+            type="button"
+            (click)="closeDetails()"
+          >
+            Hide Details
+          </button>
+        } @else {
+          <button
+            type="button"
+            (click)="onMoreDetails()"
+          >
+            More Details
+          </button>
+        }
+      }
     </footer>
   }
 </section>

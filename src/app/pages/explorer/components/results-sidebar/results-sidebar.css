@@ -3,6 +3,7 @@
   min-height: 0;
   overflow: auto;
   overscroll-behavior: contain;
+  scroll-padding-top: 3.25rem;
   background: var(--color-surface);
   border-left: 1px solid var(--color-border);
   color: var(--color-text);

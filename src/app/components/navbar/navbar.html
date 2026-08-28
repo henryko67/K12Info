@@ -11,5 +11,22 @@
     <li>
       <a routerLink="/about">About</a>
     </li>
+
+    <li class="theme-control">
+      <button
+        type="button"
+        class="theme-toggle"
+        [attr.aria-label]="theme() === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
+        [attr.title]="theme() === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
+        (click)="toggleTheme()"
+      >
+        <span class="theme-icon" aria-hidden="true">
+          {{ theme() === 'dark' ? '☀' : '☾' }}
+        </span>
+        <span class="theme-label">
+          {{ theme() === 'dark' ? 'Light' : 'Dark' }}
+        </span>
+      </button>
+    </li>
   </ul>
 </nav>

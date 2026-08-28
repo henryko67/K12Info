@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { ExplorerStore } from '../../services/explorer-store';
 import { ExplorerSchool } from '../../models/explorer-school';
+import { SchoolDetailsApi } from '../../services/school-details-api';
 
 @Component({
   imports: [],
@@ -178,5 +179,66 @@ export class SchoolPreview {
     }
 
     return school.classification?.religion ?? 'Unavailable';
+  }
+
+  readonly schoolDetailsApi = inject(SchoolDetailsApi);
+  readonly schoolDetails = this.explorerStore.schoolDetails;
+  readonly detailsOpen = this.explorerStore.detailsOpen;
+
+  onMoreDetails(): void {
+    const school = this.explorerStore.selectedSchool();
+
+    if (
+      school === null ||
+      school.sector !== 'public'
+    ) {
+      return;
+    }
+
+    if (this.explorerStore.schoolDetails() !== null) {
+      this.explorerStore.openDetails();
+      return;
+    }
+
+    this.schoolDetailsApi
+      .getDetails(school.ids.ncessch)
+      .subscribe(details => {
+        this.explorerStore.setSchoolDetails(details);
+        this.explorerStore.openDetails();
+      });
+  }
+
+  formatFte(value: number | undefined): string | number {
+    if (value === undefined || value < 0) {
+      return 'Unavailable';
+    }
+
+    return value;
+  }
+
+  formatCount(value: number | undefined): string | number {
+    if (value === undefined || value < 0) {
+      return 'Unavailable';
+    }
+
+    return value;
+  }
+
+  showPreschoolData(school: ExplorerSchool): boolean {
+    const lowest = school.grades?.lowest;
+    const highest = school.grades?.highest;
+
+    if (
+      lowest === undefined ||
+      highest === undefined
+    ) {
+      return false;
+    }
+
+    return lowest <= -1 && highest >= -1;
+  }
+
+  closeDetails(): void {
+    this.explorerStore.closeDetails();
   }
 }
