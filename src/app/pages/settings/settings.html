@@ -1,0 +1,157 @@
+<div class="settings-page">
+  <section class="settings-card">
+    <h1>Account settings</h1>
+
+    <h2>Username</h2>
+
+    <p>
+        Current username:
+        <strong>{{ currentUsername() }}</strong>
+    </p>
+
+    <p>
+      Change the display username shown on your K12Info account.
+    </p>
+
+    @if (errorMessage()) {
+      <p class="settings-error" role="alert">
+        {{ errorMessage() }}
+      </p>
+    }
+
+    @if (successMessage()) {
+      <p class="settings-success" role="status">
+        {{ successMessage() }}
+      </p>
+    }
+
+    <form
+      [formGroup]="usernameForm"
+      (ngSubmit)="updateUsername()"
+    >
+      <label for="settings-username">
+        Display username
+      </label>
+
+      <input
+        id="settings-username"
+        type="text"
+        formControlName="username"
+        autocomplete="username"
+      />
+
+      @if (
+        usernameForm.controls.username.touched &&
+        usernameForm.controls.username.hasError('required')
+      ) {
+        <p class="settings-error">
+          Please enter a username.
+        </p>
+      }
+
+      @if (
+        usernameForm.controls.username.touched &&
+        usernameForm.controls.username.invalid &&
+        !usernameForm.controls.username.hasError('required')
+      ) {
+        <p class="settings-error">
+          Username must be 3–20 characters and contain only
+          letters, numbers, and underscores.
+        </p>
+      }
+
+      <button
+        type="submit"
+        [disabled]="loading()"
+      >
+        {{ loading() ? 'Updating...' : 'Change username' }}
+      </button>
+    </form>
+  </section>
+
+  <section class="settings-card">
+    <h2>Your comments</h2>
+
+    <p>
+        Comments you have posted on school pages.
+    </p>
+
+    @if (commentsError()) {
+        <p
+        class="settings-error"
+        role="alert"
+        >
+        {{ commentsError() }}
+        </p>
+    }
+
+    @if (commentsLoading()) {
+        <p>Loading comments...</p>
+    } @else {
+        @if (comments().length === 0) {
+        <p>
+            You have not posted any comments yet.
+        </p>
+        } @else {
+        <div class="settings-comments">
+            @for (
+            comment of comments();
+            track comment._id
+            ) {
+            <article class="settings-comment">
+              <header>
+                <a
+                [routerLink]="[
+                    '/school',
+                    comment.sector,
+                    comment.school_id
+                ]"
+                >
+                {{ comment.school_name }}
+                </a>
+
+                <details class="settings-comment-actions">
+                  <summary aria-label="Comment actions">
+                    <span class="settings-comment-menu-icon" aria-hidden="true"></span>
+                  </summary>
+
+                  <div class="settings-comment-actions-menu">
+                    <button
+                    type="button"
+                    (click)="deleteComment(comment._id)"
+                    >
+                    Delete
+                    </button>
+                  </div>
+                </details>
+              </header>
+
+                <p>
+                {{ comment.text }}
+                </p>
+
+                <p class="settings-comment-date">
+                    {{ comment.created_at | date:'medium' }}
+                </p>
+            </article>
+            }
+        </div>
+
+        @if (commentsHasMore()) {
+            <button
+            type="button"
+            class="settings-load-more"
+            (click)="loadMoreComments()"
+            [disabled]="commentsLoadingMore()"
+            >
+            {{
+                commentsLoadingMore()
+                ? 'Loading...'
+                : 'Load more'
+            }}
+            </button>
+        }
+        }
+    }
+    </section>
+</div>

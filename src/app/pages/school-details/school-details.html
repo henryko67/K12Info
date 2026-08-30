@@ -1,2 +1,937 @@
-<h1>School Details</h1>
-<p>school-details works!</p>
+<main class="school-details-page">
+  <div class="school-details-shell">
+    @if (loading()) {
+        <p class="page-status">
+            Loading school...
+        </p>
+        } @else if (errorMessage()) {
+        <p
+            class="page-status page-error"
+            role="alert"
+        >
+            {{ errorMessage() }}
+        </p>
+        } @else if (school(); as school) {
+
+        <article class="school-overview">
+            <header>
+            <p class="school-sector">
+                {{
+                school.sector === 'public'
+                    ? 'Public school'
+                    : 'Private school'
+                }}
+            </p>
+
+            <h1>{{ school.school_name }}</h1>
+
+            <p class="school-classification">
+                {{ formatSchoolLevel(school) }}
+                ·
+                {{ formatSchoolType(school) }}
+            </p>
+
+            <address>
+                <p>
+                {{ school.address.location.street }}
+                </p>
+
+                <p>
+                {{ school.address.location.city }},
+                {{ school.address.location.state }}
+                {{ school.address.location.zip }}
+                </p>
+            </address>
+
+            <p>
+                {{ school.contact?.phone ?? 'Phone unavailable' }}
+            </p>
+            </header>
+        </article>
+
+
+        <div class="details-grid">
+
+            <section class="details-section">
+            <h2>Overview</h2>
+
+            <dl>
+                <div>
+                <dt>Grades</dt>
+                <dd>
+                    {{ formatGrade(school.grades?.lowest) }}
+                    –
+                    {{ formatGrade(school.grades?.highest) }}
+                </dd>
+                </div>
+
+                <div>
+                <dt>Students</dt>
+                <dd>
+                    {{ school.enrollment?.students ?? 'Unavailable' }}
+                </dd>
+                </div>
+
+                <div>
+                <dt>Teachers</dt>
+                <dd>
+                    {{
+                    formatFte(
+                        school.enrollment?.teachers_fte
+                    )
+                    }}
+                </dd>
+                </div>
+
+                <div>
+                <dt>Student–teacher ratio</dt>
+                <dd>
+                    {{
+                    school.enrollment?.students_per_teacher
+                        ?? 'Unavailable'
+                    }}
+                </dd>
+                </div>
+
+                @if (school.sector === 'public') {
+                <div>
+                    <dt>Status</dt>
+                    <dd>
+                    {{
+                        formatStatus(
+                        school.classification?.status
+                        )
+                    }}
+                    </dd>
+                </div>
+                }
+            </dl>
+            </section>
+
+
+            @if (school.sector === 'public') {
+
+            <section class="details-section">
+                <h2>School characteristics</h2>
+
+                <dl>
+                <div>
+                    <dt>Charter school</dt>
+                    <dd>
+                    {{
+                        formatYesNo(
+                        school.classification?.charter
+                        )
+                    }}
+                    </dd>
+                </div>
+
+                <div>
+                    <dt>Virtual school</dt>
+                    <dd>
+                    {{
+                        formatVirtual(
+                        school.classification?.virtual
+                        )
+                    }}
+                    </dd>
+                </div>
+
+                <div>
+                    <dt>Shared-time school</dt>
+                    <dd>
+                    {{
+                        formatYesNo(
+                        school.classification?.shared_time
+                        )
+                    }}
+                    </dd>
+                </div>
+                </dl>
+            </section>
+
+
+            <section class="details-section">
+                <h2>Programs</h2>
+
+                <dl>
+                @if (showSecondaryPrograms(school)) {
+                    <div>
+                    <dt>AP enrollment</dt>
+                    <dd>
+                        {{
+                        formatProgramEnrollment(
+                            school.program_enrollment?.ap
+                        )
+                        }}
+                    </dd>
+                    </div>
+
+                    <div>
+                    <dt>IB enrollment</dt>
+                    <dd>
+                        {{
+                        formatProgramEnrollment(
+                            school.program_enrollment?.ib
+                        )
+                        }}
+                    </dd>
+                    </div>
+
+                    <div>
+                    <dt>Dual enrollment</dt>
+                    <dd>
+                        {{
+                        formatProgramEnrollment(
+                            school.program_enrollment
+                            ?.dual_enrollment
+                        )
+                        }}
+                    </dd>
+                    </div>
+                }
+
+                <div>
+                    <dt>Gifted & talented enrollment</dt>
+                    <dd>
+                    {{
+                        formatProgramEnrollment(
+                        school.program_enrollment
+                            ?.gifted_talented
+                        )
+                    }}
+                    </dd>
+                </div>
+                </dl>
+            </section>
+
+
+            <section class="details-section">
+                <h2>Lunch program</h2>
+
+                <dl>
+                <div>
+                    <dt>National School Lunch Program</dt>
+                    <dd>
+                    {{
+                        formatLunchProgram(
+                        school.lunch?.program
+                        )
+                    }}
+                    </dd>
+                </div>
+
+                <div>
+                    <dt>Free lunch</dt>
+                    <dd>
+                    {{
+                        formatCount(
+                        school.lunch?.free
+                        )
+                    }}
+                    </dd>
+                </div>
+
+                <div>
+                    <dt>Reduced-price lunch</dt>
+                    <dd>
+                    {{
+                        formatCount(
+                        school.lunch?.reduced_price
+                        )
+                    }}
+                    </dd>
+                </div>
+
+                <div>
+                    <dt>Free or reduced-price lunch</dt>
+                    <dd>
+                    {{
+                        formatCount(
+                        school.lunch?.free_or_reduced_price
+                        )
+                    }}
+                    </dd>
+                </div>
+
+                <div>
+                    <dt>Direct certification</dt>
+                    <dd>
+                    {{
+                        formatCount(
+                        school.lunch?.direct_certification
+                        )
+                    }}
+                    </dd>
+                </div>
+                </dl>
+            </section>
+
+
+            @if (expandedDetails(); as details) {
+
+                <section class="details-section">
+                <h2>Teachers</h2>
+
+                <dl>
+                    <div>
+                    <dt>Teacher FTE</dt>
+                    <dd>
+                        {{
+                        formatFte(
+                            details.teachersStaff
+                            ?.teachers.fte
+                        )
+                        }}
+                    </dd>
+                    </div>
+
+                    <div>
+                    <dt>Certified teacher FTE</dt>
+                    <dd>
+                        {{
+                        formatFte(
+                            details.teachersStaff
+                            ?.teachers.certified_fte
+                        )
+                        }}
+                    </dd>
+                    </div>
+
+                    <div>
+                    <dt>Uncertified teacher FTE</dt>
+                    <dd>
+                        {{
+                        formatFte(
+                            details.teachersStaff
+                            ?.teachers.uncertified_fte
+                        )
+                        }}
+                    </dd>
+                    </div>
+
+                    <div>
+                    <dt>Certified teachers</dt>
+                    <dd>
+                        @if (
+                        details.teachersStaff
+                            ?.teachers.certified_pct !== undefined &&
+                        details.teachersStaff
+                            .teachers.certified_pct >= 0
+                        ) {
+                        {{
+                            details.teachersStaff
+                            .teachers.certified_pct
+                        }}%
+                        } @else {
+                        Unavailable
+                        }
+                    </dd>
+                    </div>
+                </dl>
+                </section>
+
+
+                <section class="details-section">
+                <h2>Student support staff</h2>
+
+                <dl>
+                    <div>
+                    <dt>Counselors</dt>
+                    <dd>
+                        {{
+                        formatFte(
+                            details.teachersStaff
+                            ?.support_staff.counselors_fte
+                        )
+                        }}
+                    </dd>
+                    </div>
+
+                    <div>
+                    <dt>Psychologists</dt>
+                    <dd>
+                        {{
+                        formatFte(
+                            details.teachersStaff
+                            ?.support_staff.psychologists_fte
+                        )
+                        }}
+                    </dd>
+                    </div>
+
+                    <div>
+                    <dt>Social workers</dt>
+                    <dd>
+                        {{
+                        formatFte(
+                            details.teachersStaff
+                            ?.support_staff.social_workers_fte
+                        )
+                        }}
+                    </dd>
+                    </div>
+
+                    <div>
+                    <dt>Nurses</dt>
+                    <dd>
+                        {{
+                        formatFte(
+                            details.teachersStaff
+                            ?.support_staff.nurses_fte
+                        )
+                        }}
+                    </dd>
+                    </div>
+                </dl>
+                </section>
+
+
+                <section class="details-section">
+                <h2>Safety staff</h2>
+
+                <dl>
+                    <div>
+                    <dt>Security guards</dt>
+                    <dd>
+                        {{
+                        formatFte(
+                            details.teachersStaff
+                            ?.safety_staff.security_guard_fte
+                        )
+                        }}
+                    </dd>
+                    </div>
+
+                    <div>
+                    <dt>Law enforcement officers</dt>
+                    <dd>
+                        {{
+                        formatFte(
+                            details.teachersStaff
+                            ?.safety_staff.law_enforcement_fte
+                        )
+                        }}
+                    </dd>
+                    </div>
+                </dl>
+                </section>
+
+
+                @if (details.discipline) {
+                <section class="details-section">
+                    <h2>Discipline incidents</h2>
+
+                    <dl>
+                    <div>
+                        <dt>Suspension instances</dt>
+                        <dd>
+                        {{
+                            formatCount(
+                            details.discipline
+                                .suspensions.instances
+                            )
+                        }}
+                        </dd>
+                    </div>
+
+                    @if (showPreschoolData(school)) {
+                        <div>
+                        <dt>
+                            Preschool suspension instances
+                        </dt>
+                        <dd>
+                            {{
+                            formatCount(
+                                details.discipline
+                                .suspensions
+                                .preschool_instances
+                            )
+                            }}
+                        </dd>
+                        </div>
+                    }
+
+                    <div>
+                        <dt>
+                        Corporal punishment instances
+                        </dt>
+                        <dd>
+                        {{
+                            formatCount(
+                            details.discipline
+                                .corporal_punishment.instances
+                            )
+                        }}
+                        </dd>
+                    </div>
+
+                    @if (showPreschoolData(school)) {
+                        <div>
+                        <dt>
+                            Preschool corporal punishment instances
+                        </dt>
+                        <dd>
+                            {{
+                            formatCount(
+                                details.discipline
+                                .corporal_punishment
+                                .preschool_instances
+                            )
+                            }}
+                        </dd>
+                        </div>
+                    }
+                    </dl>
+                </section>
+                }
+            }
+
+
+            <section class="details-section">
+                <h2>District & geography</h2>
+
+                <dl>
+                <div>
+                    <dt>District</dt>
+                    <dd>
+                    {{
+                        school.geography?.district?.name
+                        ?? 'Unavailable'
+                    }}
+                    </dd>
+                </div>
+
+                <div>
+                    <dt>Congressional district</dt>
+                    <dd>
+                    {{
+                        school.geography
+                        ?.congressional_district
+                        ?? 'Unavailable'
+                    }}
+                    </dd>
+                </div>
+
+                <div>
+                    <dt>State legislative district — lower</dt>
+                    <dd>
+                    {{
+                        school.geography
+                        ?.district
+                        ?.state_legislative_district
+                        ?.lower
+                        ?? 'Unavailable'
+                    }}
+                    </dd>
+                </div>
+
+                <div>
+                    <dt>State legislative district — upper</dt>
+                    <dd>
+                    {{
+                        school.geography
+                        ?.district
+                        ?.state_legislative_district
+                        ?.upper
+                        ?? 'Unavailable'
+                    }}
+                    </dd>
+                </div>
+                </dl>
+            </section>
+
+
+            <section class="details-section">
+                <h2>Identifiers</h2>
+
+                <dl>
+                <div>
+                    <dt>NCES school ID</dt>
+                    <dd>{{ school.ids.ncessch }}</dd>
+                </div>
+
+                <div>
+                    <dt>LEA ID</dt>
+                    <dd>{{ school.ids.leaid }}</dd>
+                </div>
+
+                <div>
+                    <dt>State LEA ID</dt>
+                    <dd>{{ school.ids.state_leaid }}</dd>
+                </div>
+                </dl>
+            </section>
+
+
+            <section class="details-section">
+                <h2>Sources</h2>
+
+                <ul>
+                <li>
+                    {{ school.sources.ccd.name }}
+                    ({{ school.sources.ccd.abbreviation }},
+                    {{ school.sources.ccd.year }})
+                </li>
+
+                @if (school.sources.crdc) {
+                    <li>
+                    {{ school.sources.crdc.name }}
+                    ({{ school.sources.crdc.abbreviation }},
+                    {{ school.sources.crdc.year }})
+                    </li>
+                }
+                </ul>
+            </section>
+
+            }
+
+
+            @if (school.sector === 'private') {
+
+            <section class="details-section">
+                <h2>School profile</h2>
+
+                <dl>
+                <div>
+                    <dt>Religion</dt>
+                    <dd>
+                    {{
+                        school.classification?.religion
+                        ?? 'Unavailable'
+                    }}
+                    </dd>
+                </div>
+
+                <div>
+                    <dt>Library / media center</dt>
+                    <dd>
+                    {{
+                        formatLibraryMediaCenter(
+                        school.facilities
+                            ?.library_media_center
+                        )
+                    }}
+                    </dd>
+                </div>
+
+                <div>
+                    <dt>School day</dt>
+                    <dd>
+                    @if (
+                        school.operations
+                        ?.school_day_hours !== undefined
+                    ) {
+                        {{
+                        school.operations
+                            ?.school_day_hours
+                        }} hours
+                    } @else {
+                        Unavailable
+                    }
+                    </dd>
+                </div>
+
+                <div>
+                    <dt>School year</dt>
+                    <dd>
+                    @if (
+                        school.operations
+                        ?.school_days_per_year !== undefined
+                    ) {
+                        {{
+                        school.operations
+                            ?.school_days_per_year
+                        }} days
+                    } @else {
+                        Unavailable
+                    }
+                    </dd>
+                </div>
+                </dl>
+            </section>
+
+
+            @if (school.enrollment?.by_grade) {
+                <section class="details-section">
+                <h2>Enrollment by grade</h2>
+
+                <dl>
+                    <div>
+                    <dt>Kindergarten</dt>
+                    <dd>
+                        {{
+                        school.enrollment
+                            .by_grade.kindergarten
+                            ?? 'Unavailable'
+                        }}
+                    </dd>
+                    </div>
+
+                    <div>
+                    <dt>Grade 1</dt>
+                    <dd>
+                        {{
+                        school.enrollment
+                            .by_grade.grade_1
+                            ?? 'Unavailable'
+                        }}
+                    </dd>
+                    </div>
+
+                    <div>
+                    <dt>Grade 2</dt>
+                    <dd>
+                        {{
+                        school.enrollment
+                            .by_grade.grade_2
+                            ?? 'Unavailable'
+                        }}
+                    </dd>
+                    </div>
+
+                    <div>
+                    <dt>Grade 3</dt>
+                    <dd>
+                        {{
+                        school.enrollment
+                            .by_grade.grade_3
+                            ?? 'Unavailable'
+                        }}
+                    </dd>
+                    </div>
+
+                    <div>
+                    <dt>Grade 4</dt>
+                    <dd>
+                        {{
+                        school.enrollment
+                            .by_grade.grade_4
+                            ?? 'Unavailable'
+                        }}
+                    </dd>
+                    </div>
+
+                    <div>
+                    <dt>Grade 5</dt>
+                    <dd>
+                        {{
+                        school.enrollment
+                            .by_grade.grade_5
+                            ?? 'Unavailable'
+                        }}
+                    </dd>
+                    </div>
+
+                    <div>
+                    <dt>Grade 6</dt>
+                    <dd>
+                        {{
+                        school.enrollment
+                            .by_grade.grade_6
+                            ?? 'Unavailable'
+                        }}
+                    </dd>
+                    </div>
+
+                    <div>
+                    <dt>Grade 7</dt>
+                    <dd>
+                        {{
+                        school.enrollment
+                            .by_grade.grade_7
+                            ?? 'Unavailable'
+                        }}
+                    </dd>
+                    </div>
+
+                    <div>
+                    <dt>Grade 8</dt>
+                    <dd>
+                        {{
+                        school.enrollment
+                            .by_grade.grade_8
+                            ?? 'Unavailable'
+                        }}
+                    </dd>
+                    </div>
+
+                    <div>
+                    <dt>Grade 9</dt>
+                    <dd>
+                        {{
+                        school.enrollment
+                            .by_grade.grade_9
+                            ?? 'Unavailable'
+                        }}
+                    </dd>
+                    </div>
+
+                    <div>
+                    <dt>Grade 10</dt>
+                    <dd>
+                        {{
+                        school.enrollment
+                            .by_grade.grade_10
+                            ?? 'Unavailable'
+                        }}
+                    </dd>
+                    </div>
+
+                    <div>
+                    <dt>Grade 11</dt>
+                    <dd>
+                        {{
+                        school.enrollment
+                            .by_grade.grade_11
+                            ?? 'Unavailable'
+                        }}
+                    </dd>
+                    </div>
+
+                    <div>
+                    <dt>Grade 12</dt>
+                    <dd>
+                        {{
+                        school.enrollment
+                            .by_grade.grade_12
+                            ?? 'Unavailable'
+                        }}
+                    </dd>
+                    </div>
+                </dl>
+                </section>
+            }
+
+
+            <section class="details-section">
+                <h2>Identifiers</h2>
+
+                <dl>
+                <div>
+                    <dt>NCES school ID</dt>
+                    <dd>
+                    {{ school.ids.nces_id }}
+                    </dd>
+                </div>
+                </dl>
+            </section>
+
+
+            <section class="details-section">
+                <h2>Sources</h2>
+
+                <ul>
+                <li>
+                    {{ school.sources.nces.name }}
+                    ({{ school.sources.nces.abbreviation }},
+                    {{ school.sources.nces.year }})
+                </li>
+                </ul>
+            </section>
+            }
+
+        </div>
+        }
+
+    <section class="comments-section">
+      <h2>Comments</h2>
+      @if (auth.isAuthenticated()) {
+        <div class="comment-form">
+        <label for="school-comment">Post a comment</label>
+        <textarea
+            id="school-comment"
+            rows="4"
+            placeholder="Write a comment..."
+            [value]="commentText()"
+            (input)="commentText.set($any($event.target).value)"
+            [disabled]="commentPosting()"
+        ></textarea>
+
+        @if (commentPostError()) {
+            <p class="comments-error" role="alert">
+            {{ commentPostError() }}
+            </p>
+        }
+
+        <button
+            type="button"
+            (click)="postComment()"
+            [disabled]="commentPosting() || !commentText().trim()"
+        >
+            @if (commentPosting()) {
+            Posting...
+            } @else {
+            Post comment
+            }
+        </button>
+        </div>
+    } @else {
+        <p class="comments-login-message">
+            Log in to post a comment.
+        </p>
+    }
+
+      @if (commentsLoading()) {
+        <p class="comments-status">Loading comments...</p>
+      } @else if (commentsError()) {
+        <p class="comments-status comments-error" role="alert">
+          {{ commentsError() }}
+        </p>
+      } @else if (comments().length === 0) {
+        <p class="comments-status">No comments yet.</p>
+      } @else {
+        <div class="comments-list">
+          @for (comment of comments(); track comment._id) {
+            <article class="comment">
+              <header>
+                <strong>
+                  {{ comment.author?.username ?? 'Unknown user' }}
+                </strong>
+
+                <div class="comment-header-actions">
+                  <span>
+                    {{ comment.created_at }}
+                  </span>
+
+                  @if (isAuthenticated() && comment.is_owner) {
+                    <details class="comment-actions">
+                      <summary aria-label="Comment actions">
+                        <span class="comment-menu-icon" aria-hidden="true"></span>
+                      </summary>
+
+                      <div class="comment-actions-menu">
+                        <button
+                          type="button"
+                          (click)="deleteComment(comment._id)"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </details>
+                  }
+                </div>
+              </header>
+
+              <p>{{ comment.text }}</p>
+            </article>
+          }
+          @if (commentsHasMore()) {
+                <button
+                    type="button"
+                    class="load-more-comments"
+                    (click)="loadMoreComments()"
+                    [disabled]="commentsLoadingMore()"
+                >
+                    @if (commentsLoadingMore()) {
+                    Loading...
+                    } @else {
+                    Load more comments
+                    }
+                </button>
+            }
+        </div>
+      }
+    </section>
+  </div>
+</main>

@@ -3,6 +3,7 @@ import { Routes } from '@angular/router';
 import { Explorer } from './pages/explorer/explorer';
 import { About } from './pages/about/about';
 import { SchoolDetails } from './pages/school-details/school-details';
+import { Settings } from './pages/settings/settings';
 
 export const routes: Routes = [
   {
@@ -20,6 +21,10 @@ export const routes: Routes = [
   {
     path: 'school/:sector/:id',
     component: SchoolDetails
+  },
+  {
+    path: 'settings',
+    component: Settings
   },
   {
     path: '**',

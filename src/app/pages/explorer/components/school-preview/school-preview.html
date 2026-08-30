@@ -257,7 +257,7 @@
     @if (
       school.sector === 'public' &&
       detailsOpen() &&
-      schoolDetails();
+      expandedDetails();
       as details
     ) {
       <section class="preview-section">
@@ -452,6 +452,12 @@
           </button>
         }
       }
+      <button
+        type="button"
+        (click)="openSchoolDetails()"
+      >
+        View Full School
+      </button>
     </footer>
   }
 </section>

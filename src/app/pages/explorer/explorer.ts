@@ -17,7 +17,7 @@ import { ExplorerStore } from './services/explorer-store';
     ResultsSidebar,
     SchoolPreview
   ],
-  providers: [ExplorerStore],
+  providers: [],
   templateUrl: './explorer.html',
   styleUrl: './explorer.css'
 })

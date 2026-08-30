@@ -28,5 +28,45 @@
         </span>
       </button>
     </li>
+    <li class="auth-control">
+      @if (!auth.isAuthenticated()) {
+        <button
+          type="button"
+          (click)="openAuth()"
+        >
+          Log in
+        </button>
+      } @else {
+        <button
+          type="button"
+          [attr.aria-expanded]="accountOpen()"
+          (click)="toggleAccount()"
+        >
+          Account
+        </button>
+
+        @if (accountOpen()) {
+          <div class="account-menu">
+            <a
+              routerLink="/settings"
+              (click)="accountOpen.set(false)"
+            >
+              Settings
+            </a>
+
+            <button
+              type="button"
+              (click)="logout()"
+            >
+              Sign out
+            </button>
+          </div>
+        }
+      }
+    </li>
+
+    @if (authOpen() && !auth.isAuthenticated()) {
+      <app-auth-modal (closed)="closeAuth()" />
+    }
   </ul>
 </nav>

@@ -475,10 +475,19 @@ export class ExplorerStore {
     });
   });
 
-  readonly schoolDetails = signal<SchoolDetailsResponse | null>(null);
+  readonly schoolDetails = signal<{
+    ncessch: string;
+    details: SchoolDetailsResponse;
+  } | null>(null);
 
-  setSchoolDetails(details: SchoolDetailsResponse): void {
-    this.schoolDetails.set(details);
+  setSchoolDetails(
+    ncessch: string,
+    details: SchoolDetailsResponse
+  ): void {
+    this.schoolDetails.set({
+      ncessch,
+      details
+    });
   }
 
   clearSchoolDetails(): void {
