@@ -9,6 +9,7 @@ import { UserApi } from '../../services/user-api';
 import { ProfileStore } from '../../services/profile-store';
 import { Auth } from '../../services/auth';
 import { CommentsApi } from '../../services/comments-api';
+import { WebSocketService } from '../../services/websocket';
 
 import { UserComment } from '../../models/user-comment';
 
@@ -28,10 +29,8 @@ export class Settings implements OnDestroy {
   private readonly router = inject(Router);
 
   private readonly commentsApi = inject(CommentsApi);
-
-  // Settings owns this controller; destroying the page stops both the active
-  // authenticated request and every future reconnect attempt.
-  private commentsStreamController: AbortController | null = null;
+  private readonly websocket = inject(WebSocketService);
+  private readonly removeCommentListener: () => void;
 
   readonly errorMessage = signal('');
   readonly successMessage = signal('');
@@ -84,9 +83,16 @@ export class Settings implements OnDestroy {
   });
 
   constructor() {
+    this.removeCommentListener = this.websocket.onCommentEvent((event) => {
+      if (event.event === 'comment-created') {
+        void this.handleCommentCreated(event.data.comment_id);
+      } else {
+        void this.handleCommentDeleted(event.data.comment_id);
+      }
+    });
+
     this.loadProfile();
     this.loadComments();
-    this.openCommentsStream();
   }
 
   private async loadProfile(): Promise<void> {
@@ -152,18 +158,6 @@ export class Settings implements OnDestroy {
       this.commentsError.set('Unable to load more comments.');
     } finally {
       this.commentsLoadingMore.set(false);
-    }
-  }
-
-  private async openCommentsStream(): Promise<void> {
-    try {
-      this.commentsStreamController = await this.commentsApi.openCurrentUserCommentsStream(
-        (commentId) => this.handleCommentCreated(commentId),
-
-        (commentId) => this.handleCommentDeleted(commentId),
-      );
-    } catch (error) {
-      console.error('Unable to open user comments stream:', error);
     }
   }
 
@@ -267,6 +261,6 @@ export class Settings implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.commentsStreamController?.abort();
+    this.removeCommentListener();
   }
 }

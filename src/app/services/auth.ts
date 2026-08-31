@@ -6,6 +6,9 @@ import {
   confirmSignUp,
   getCurrentUser,
   autoSignIn,
+  fetchAuthSession,
+  resetPassword,
+  confirmResetPassword,
 } from 'aws-amplify/auth';
 
 import { UserApi } from './user-api';
@@ -41,6 +44,18 @@ export class Auth {
         this.sessionResolved.set(true);
       }
     };
+  }
+
+  /** Returns the current Cognito access token without exposing session details to consumers. */
+  async getAccessToken(): Promise<string> {
+    const session = await fetchAuthSession();
+    const accessToken = session.tokens?.accessToken?.toString();
+
+    if (!accessToken) {
+      throw new Error('No authenticated Cognito session');
+    }
+
+    return accessToken;
   }
 
   private async restoreSession(): Promise<void> {
@@ -130,6 +145,22 @@ export class Auth {
     }
 
     return false;
+  }
+
+  async requestPasswordReset(email: string): Promise<'CONFIRM_RESET_PASSWORD_WITH_CODE' | 'DONE'> {
+    const result = await resetPassword({
+      username: email,
+    });
+
+    return result.nextStep.resetPasswordStep;
+  }
+
+  async confirmPasswordReset(email: string, code: string, newPassword: string): Promise<void> {
+    await confirmResetPassword({
+      username: email,
+      confirmationCode: code,
+      newPassword,
+    });
   }
 
   async logout(): Promise<void> {

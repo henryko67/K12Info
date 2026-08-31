@@ -1,10 +1,5 @@
 import { Component, HostListener, inject, output, signal } from '@angular/core';
-import {
-  ReactiveFormsModule,
-  FormControl,
-  FormGroup,
-  Validators
-} from '@angular/forms';
+import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Auth } from '../../services/auth';
 import { UserApi } from '../../services/user-api';
 import { ProfileStore } from '../../services/profile-store';
@@ -13,7 +8,7 @@ import { ProfileStore } from '../../services/profile-store';
   selector: 'app-auth-modal',
   imports: [ReactiveFormsModule],
   templateUrl: './auth-modal.html',
-  styleUrl: './auth-modal.css'
+  styleUrl: './auth-modal.css',
 })
 export class AuthModal {
   private readonly auth = inject(Auth);
@@ -21,7 +16,9 @@ export class AuthModal {
   private readonly profileStore = inject(ProfileStore);
   readonly closed = output<void>();
 
-  readonly mode = signal<'login' | 'signup' | 'verify' | 'complete-profile'>('login');
+  readonly mode = signal<
+    'login' | 'signup' | 'verify' | 'complete-profile' | 'forgot-password' | 'reset-password'
+  >('login');
 
   readonly errorMessage = signal('');
   readonly successMessage = signal('');
@@ -30,17 +27,12 @@ export class AuthModal {
   readonly loginForm = new FormGroup({
     email: new FormControl('', {
       nonNullable: true,
-      validators: [
-        Validators.required,
-        Validators.email
-      ]
+      validators: [Validators.required, Validators.email],
     }),
     password: new FormControl('', {
       nonNullable: true,
-      validators: [
-        Validators.required
-      ]
-    })
+      validators: [Validators.required],
+    }),
   });
 
   close(): void {
@@ -61,49 +53,31 @@ export class AuthModal {
     this.loading.set(true);
 
     try {
-      const result =
-        await this.auth.login(
-          email.trim(),
-          password
-        );
+      const result = await this.auth.login(email.trim(), password);
 
       if (result === 'CONFIRM_SIGN_UP') {
         this.pendingEmail.set(email.trim());
 
-        sessionStorage.setItem(
-          'authPendingVerification',
-          'true'
-        );
+        sessionStorage.setItem('authPendingVerification', 'true');
 
         this.mode.set('verify');
 
-        this.successMessage.set(
-          'Please enter the verification code sent to your email.'
-        );
+        this.successMessage.set('Please enter the verification code sent to your email.');
 
         return;
       }
 
-      const profile =
-        await this.userApi.getCurrentUserProfile();
+      const profile = await this.userApi.getCurrentUserProfile();
 
       if (profile) {
-        this.profileStore.setUsername(
-          profile.username
-        );
-      } else  {
-        const pendingUsername =
-          this.getPendingSignup()?.username;
+        this.profileStore.setUsername(profile.username);
+      } else {
+        const pendingUsername = this.getPendingSignup()?.username;
 
         if (pendingUsername) {
-          const createdProfile =
-            await this.userApi.createUserProfile(
-              pendingUsername
-            );
+          const createdProfile = await this.userApi.createUserProfile(pendingUsername);
 
-          this.profileStore.setUsername(
-            createdProfile.username
-          );
+          this.profileStore.setUsername(createdProfile.username);
         } else {
           this.mode.set('complete-profile');
           return;
@@ -114,19 +88,14 @@ export class AuthModal {
 
       this.auth.markAuthenticated();
 
-      this.successMessage.set(
-        'Logged in successfully.'
-      );
-
+      this.successMessage.set('Logged in successfully.');
     } catch (error: any) {
       console.error(error);
 
       if (error.name === 'NotAuthorizedException') {
         this.errorMessage.set('Incorrect email or password.');
       } else {
-        this.errorMessage.set(
-          'Unable to log in. Please try again.'
-        );
+        this.errorMessage.set('Unable to log in. Please try again.');
       }
     } finally {
       this.loading.set(false);
@@ -142,52 +111,61 @@ export class AuthModal {
         Validators.required,
         Validators.minLength(3),
         Validators.maxLength(20),
-        Validators.pattern(/^[a-zA-Z0-9_]+$/)
-      ]
+        Validators.pattern(/^[a-zA-Z0-9_]+$/),
+      ],
     }),
     email: new FormControl('', {
       nonNullable: true,
-      validators: [
-        Validators.required,
-        Validators.email
-      ]
+      validators: [Validators.required, Validators.email],
     }),
     password: new FormControl('', {
       nonNullable: true,
-      validators: [
-        Validators.required
-      ]
+      validators: [Validators.required],
     }),
     confirmPassword: new FormControl('', {
       nonNullable: true,
-      validators: [
-        Validators.required
-      ]
-    })
+      validators: [Validators.required],
+    }),
   });
 
   readonly verifyForm = new FormGroup({
     code: new FormControl('', {
       nonNullable: true,
-      validators: [
-        Validators.required
-      ]
-    })
+      validators: [Validators.required],
+    }),
+  });
+
+  readonly passwordResetEmail = signal('');
+
+  readonly forgotPasswordForm = new FormGroup({
+    email: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.email],
+    }),
+  });
+
+  readonly resetPasswordForm = new FormGroup({
+    code: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required],
+    }),
+    newPassword: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required],
+    }),
+    confirmPassword: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required],
+    }),
   });
 
   constructor() {
-    const pendingSignup =
-      this.getPendingSignup();
+    const pendingSignup = this.getPendingSignup();
 
-    const wasVerifying =
-      sessionStorage.getItem(
-        'authPendingVerification'
-      ) === 'true';
+    const wasVerifying = sessionStorage.getItem('authPendingVerification') === 'true';
 
     if (pendingSignup && wasVerifying) {
-      this.pendingEmail.set(
-        pendingSignup.email
-      );
+      this.pendingEmail.set(pendingSignup.email);
 
       this.mode.set('verify');
     }
@@ -200,12 +178,7 @@ export class AuthModal {
       return;
     }
 
-    const {
-      displayUsername,
-      email,
-      password,
-      confirmPassword
-    } = this.signupForm.getRawValue();
+    const { displayUsername, email, password, confirmPassword } = this.signupForm.getRawValue();
 
     if (password !== confirmPassword) {
       this.errorMessage.set('Passwords do not match.');
@@ -218,10 +191,7 @@ export class AuthModal {
 
     try {
       // Check K12Info/Mongo username availability
-      const available =
-        await this.userApi.checkUsernameAvailability(
-          displayUsername.trim()
-        );
+      const available = await this.userApi.checkUsernameAvailability(displayUsername.trim());
 
       if (!available) {
         this.errorMessage.set('Username is already taken.');
@@ -231,38 +201,133 @@ export class AuthModal {
       // Then create the Cognito account
       await this.auth.signup(email.trim(), password);
 
-      this.savePendingSignup(
-        email.trim(),
-        displayUsername.trim()
-      );
+      this.savePendingSignup(email.trim(), displayUsername.trim());
 
-      sessionStorage.setItem(
-        'authPendingVerification',
-        'true'
-      );
+      sessionStorage.setItem('authPendingVerification', 'true');
 
       this.pendingEmail.set(email.trim());
       this.mode.set('verify');
-
     } catch (error: any) {
       console.error(error);
 
       if (error.name === 'InvalidPasswordException') {
-        this.errorMessage.set(
-          'Password does not meet the required password rules.'
-        );
+        this.errorMessage.set('Password does not meet the required password rules.');
       } else if (error.name === 'UsernameExistsException') {
-        this.errorMessage.set(
-          'An account with this email already exists.'
-        );
+        this.errorMessage.set('An account with this email already exists.');
       } else if (error.name === 'InvalidParameterException') {
-        this.errorMessage.set(
-          'Please check your account information and try again.'
-        );
+        this.errorMessage.set('Please check your account information and try again.');
       } else {
-        this.errorMessage.set(
-          'Unable to create account. Please try again.'
-        );
+        this.errorMessage.set('Unable to create account. Please try again.');
+      }
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  showForgotPassword(): void {
+    this.errorMessage.set('');
+    this.successMessage.set('');
+    this.forgotPasswordForm.controls.email.setValue(
+      this.passwordResetEmail() || this.loginForm.controls.email.value,
+    );
+    this.mode.set('forgot-password');
+  }
+
+  showLogin(): void {
+    this.errorMessage.set('');
+    this.successMessage.set('');
+    this.mode.set('login');
+  }
+
+  async requestPasswordReset(): Promise<void> {
+    if (this.forgotPasswordForm.invalid) {
+      this.forgotPasswordForm.markAllAsTouched();
+      this.errorMessage.set('Please enter a valid email address.');
+      return;
+    }
+
+    const email = this.forgotPasswordForm.controls.email.value.trim();
+
+    this.errorMessage.set('');
+    this.successMessage.set('');
+    this.loading.set(true);
+
+    try {
+      const nextStep = await this.auth.requestPasswordReset(email);
+
+      if (nextStep === 'DONE') {
+        this.mode.set('login');
+        this.successMessage.set('Your password reset is already complete. You can log in.');
+        return;
+      }
+
+      this.passwordResetEmail.set(email);
+      this.mode.set('reset-password');
+      this.successMessage.set('A password reset code was sent to your email.');
+    } catch (error: any) {
+      console.error(error);
+
+      if (error.name === 'UserNotFoundException') {
+        this.errorMessage.set('No account was found for that email address.');
+      } else if (error.name === 'InvalidParameterException') {
+        this.errorMessage.set('Please enter a valid email address.');
+      } else if (
+        error.name === 'LimitExceededException' ||
+        error.name === 'TooManyRequestsException'
+      ) {
+        this.errorMessage.set('Too many reset attempts. Please wait and try again.');
+      } else {
+        this.errorMessage.set('Unable to start the password reset. Please try again.');
+      }
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  async confirmPasswordReset(): Promise<void> {
+    if (this.resetPasswordForm.invalid) {
+      this.resetPasswordForm.markAllAsTouched();
+      this.errorMessage.set('Please complete all password reset fields.');
+      return;
+    }
+
+    const { code, newPassword, confirmPassword } = this.resetPasswordForm.getRawValue();
+
+    if (newPassword !== confirmPassword) {
+      this.errorMessage.set('Passwords do not match.');
+      return;
+    }
+
+    this.errorMessage.set('');
+    this.successMessage.set('');
+    this.loading.set(true);
+
+    try {
+      await this.auth.confirmPasswordReset(this.passwordResetEmail(), code.trim(), newPassword);
+
+      this.loginForm.controls.email.setValue(this.passwordResetEmail());
+      this.resetPasswordForm.reset();
+      this.passwordResetEmail.set('');
+      this.mode.set('login');
+      this.successMessage.set('Password reset successfully. You can now log in.');
+    } catch (error: any) {
+      console.error(error);
+
+      if (error.name === 'CodeMismatchException') {
+        this.errorMessage.set('That verification code is incorrect.');
+      } else if (error.name === 'ExpiredCodeException') {
+        this.errorMessage.set('That verification code has expired. Request a new code.');
+      } else if (error.name === 'InvalidPasswordException') {
+        this.errorMessage.set('Password does not meet the required password rules.');
+      } else if (error.name === 'InvalidParameterException') {
+        this.errorMessage.set('Please check the verification code and new password.');
+      } else if (
+        error.name === 'LimitExceededException' ||
+        error.name === 'TooManyRequestsException'
+      ) {
+        this.errorMessage.set('Too many reset attempts. Please wait and try again.');
+      } else {
+        this.errorMessage.set('Unable to reset your password. Please try again.');
       }
     } finally {
       this.loading.set(false);
@@ -284,15 +349,9 @@ export class AuthModal {
     this.loading.set(true);
 
     try {
-      const signedIn =
-        await this.auth.confirmSignup(
-          email,
-          code.trim()
-        );
+      const signedIn = await this.auth.confirmSignup(email, code.trim());
       if (!signedIn) {
-        this.successMessage.set(
-          'Email verified. Please log in to finish creating your account.'
-        );
+        this.successMessage.set('Email verified. Please log in to finish creating your account.');
 
         this.mode.set('login');
         return;
@@ -305,23 +364,15 @@ export class AuthModal {
         return;
       }
 
+      const createdProfile = await this.userApi.createUserProfile(pendingSignup.username);
 
-      const createdProfile =
-        await this.userApi.createUserProfile(
-          pendingSignup.username
-        );
-
-      this.profileStore.setUsername(
-        createdProfile.username
-      );
+      this.profileStore.setUsername(createdProfile.username);
 
       this.clearPendingSignup();
 
       this.auth.markAuthenticated();
 
-      this.successMessage.set(
-        'Account created successfully.'
-      );
+      this.successMessage.set('Account created successfully.');
     } catch (error: any) {
       console.error(error);
 
@@ -337,16 +388,13 @@ export class AuthModal {
     }
   }
 
-  private savePendingSignup(
-    email: string,
-    username: string
-  ): void {
+  private savePendingSignup(email: string, username: string): void {
     localStorage.setItem(
       'pendingSignup',
       JSON.stringify({
         email,
-        username
-      })
+        username,
+      }),
     );
   }
 
@@ -371,9 +419,7 @@ export class AuthModal {
   private clearPendingSignup(): void {
     localStorage.removeItem('pendingSignup');
 
-    sessionStorage.removeItem(
-      'authPendingVerification'
-    );
+    sessionStorage.removeItem('authPendingVerification');
   }
 
   readonly completeProfileForm = new FormGroup({
@@ -383,9 +429,9 @@ export class AuthModal {
         Validators.required,
         Validators.minLength(3),
         Validators.maxLength(20),
-        Validators.pattern(/^[a-zA-Z0-9_]+$/)
-      ]
-    })
+        Validators.pattern(/^[a-zA-Z0-9_]+$/),
+      ],
+    }),
   });
 
   async completeProfile(): Promise<void> {
@@ -395,47 +441,33 @@ export class AuthModal {
       return;
     }
 
-    const { displayUsername } =
-      this.completeProfileForm.getRawValue();
+    const { displayUsername } = this.completeProfileForm.getRawValue();
 
     this.errorMessage.set('');
     this.successMessage.set('');
     this.loading.set(true);
 
     try {
-      const available =
-        await this.userApi.checkUsernameAvailability(
-          displayUsername.trim()
-        );
+      const available = await this.userApi.checkUsernameAvailability(displayUsername.trim());
 
       if (!available) {
         this.errorMessage.set('Username is already taken.');
         return;
       }
 
-      const createdProfile =
-        await this.userApi.createUserProfile(
-          displayUsername.trim()
-        );
+      const createdProfile = await this.userApi.createUserProfile(displayUsername.trim());
 
-      this.profileStore.setUsername(
-        createdProfile.username
-      );
+      this.profileStore.setUsername(createdProfile.username);
 
       this.clearPendingSignup();
 
       this.auth.markAuthenticated();
 
-      this.successMessage.set(
-        'Account setup completed successfully.'
-      );
-
+      this.successMessage.set('Account setup completed successfully.');
     } catch (error: any) {
       console.error(error);
 
-      this.errorMessage.set(
-        'Unable to complete account setup. Please try again.'
-      );
+      this.errorMessage.set('Unable to complete account setup. Please try again.');
     } finally {
       this.loading.set(false);
     }
@@ -443,16 +475,10 @@ export class AuthModal {
 
   @HostListener('window:storage', ['$event'])
   onStorageChange(event: StorageEvent): void {
-    if (
-      event.key === 'pendingSignup' &&
-      event.newValue === null &&
-      this.mode() === 'verify'
-    ) {
+    if (event.key === 'pendingSignup' && event.newValue === null && this.mode() === 'verify') {
       this.mode.set('login');
       this.pendingEmail.set('');
-      this.successMessage.set(
-        'Email verification completed. You can log in.'
-      );
+      this.successMessage.set('Email verification completed. You can log in.');
     }
   }
 }

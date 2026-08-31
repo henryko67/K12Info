@@ -1,265 +1,337 @@
-<div
-  class="auth-modal"
-  role="region"
-  aria-labelledby="auth-modal-heading"
->
-    @if (mode() === 'login') {
-        <header class="auth-header">
-            <div>
-            <h2 id="auth-modal-heading">Welcome back</h2>
-            <p>Log in to your K12Info account.</p>
-            </div>
+<div class="auth-modal" role="region" aria-labelledby="auth-modal-heading">
+  @if (mode() === 'login') {
+    <header class="auth-header">
+      <div>
+        <h2 id="auth-modal-heading">Welcome back</h2>
+        <p>Log in to your K12Info account.</p>
+      </div>
 
-            <button
-            type="button"
-            class="auth-close"
-            aria-label="Close login"
-            (click)="close()"
-            >
-            ×
-            </button>
-        </header>
+      <button type="button" class="auth-close" aria-label="Close login" (click)="close()">×</button>
+    </header>
 
-        @if (errorMessage()) {
-            <p class="auth-error" role="alert">
-                {{ errorMessage() }}
-            </p>
-        }
-
-        @if (successMessage()) {
-            <p class="auth-success" role="status">
-                {{ successMessage() }}
-            </p>
-        }
-
-        <form [formGroup]="loginForm" (ngSubmit)="login()">
-            <label for="auth-email">Email</label>
-
-            <input
-            id="auth-email"
-            type="email"
-            formControlName="email"
-            autocomplete="email"
-            />
-
-            @if (
-            loginForm.controls.email.invalid &&
-            loginForm.controls.email.touched
-            ) {
-                <p class="auth-error">
-                    Please enter a valid email address.
-                </p>
-            }
-
-            <label for="auth-password">Password</label>
-
-            <input
-            id="auth-password"
-            type="password"
-            formControlName="password"
-            autocomplete="current-password"
-            />
-
-            <button
-            type="submit"
-            [disabled]="loading()"
-            >
-            {{ loading() ? 'Logging in...' : 'Log in' }}
-            </button>
-        </form>
-
-        <div class="auth-links">
-            <button type="button">
-            Forgot password?
-            </button>
-
-            <button type="button" (click)="errorMessage.set(''); successMessage.set(''); mode.set('signup')">
-            Create an account
-            </button>
-        </div>
+    @if (errorMessage()) {
+      <p class="auth-error" role="alert">
+        {{ errorMessage() }}
+      </p>
     }
 
-    @if (mode() === 'signup') {
-        <header class="auth-header">
-            <div>
-            <h2 id="auth-modal-heading">Create account</h2>
-            <p>Join K12Info.</p>
-            </div>
-
-            <button
-            type="button"
-            class="auth-close"
-            aria-label="Close signup"
-            (click)="close()"
-            >
-            ×
-            </button>
-        </header>
-
-        @if (errorMessage()) {
-            <p class="auth-error" role="alert">
-                {{ errorMessage() }}
-            </p>
-        }
-
-        @if (successMessage()) {
-            <p class="auth-success" role="status">
-                {{ successMessage() }}
-            </p>
-        }
-
-        <form [formGroup]="signupForm" (ngSubmit)="signup()">
-            <label for="signup-username">Display username</label>
-
-            <input
-            id="signup-username"
-            type="text"
-            formControlName="displayUsername"
-            autocomplete="username"
-            />
-
-            @if (
-            signupForm.controls.displayUsername.touched &&
-            signupForm.controls.displayUsername.hasError('required')
-            ) {
-                <p class="auth-error">
-                    Please enter a display username.
-                </p>
-            }
-
-            @if (
-                signupForm.controls.displayUsername.invalid &&
-                signupForm.controls.displayUsername.touched &&
-                !signupForm.controls.displayUsername.hasError('required')
-            ) {
-                <p class="auth-error">
-                    Username must be 3–20 characters and contain only
-                    letters, numbers, and underscores.
-                </p>
-            }
-
-            <label for="signup-email">Email</label>
-            <input
-            id="signup-email"
-            type="email"
-            formControlName="email"
-            autocomplete="email"
-            />
-
-            @if (
-            signupForm.controls.email.invalid &&
-            signupForm.controls.email.touched
-            ) {
-                <p class="auth-error">
-                    Please enter a valid email address.
-                </p>
-            }
-
-            <label for="signup-password">Password</label>
-            <p class="password-hint">
-                Password must meet the account security requirements with special characters and numbers.
-            </p>
-            <input
-            id="signup-password"
-            type="password"
-            formControlName="password"
-            autocomplete="new-password"
-            />
-
-            <label for="signup-confirm-password">
-                Confirm password
-            </label>
-
-            <input
-            id="signup-confirm-password"
-            type="password"
-            formControlName="confirmPassword"
-            autocomplete="new-password"
-            />
-
-            <button
-            type="submit"
-            [disabled]="loading()"
-            >
-                {{ loading() ? 'Creating account...' : 'Create account' }}
-            </button>
-        </form>
-
-        <div class="auth-links auth-links-single">
-            <button type="button" (click)="mode.set('login')">
-                Back to login
-            </button>
-        </div>
+    @if (successMessage()) {
+      <p class="auth-success" role="status">
+        {{ successMessage() }}
+      </p>
     }
 
-    @if (mode() === 'verify') {
-        <header class="auth-header">
-            <div>
-            <h2 id="auth-modal-heading">Verify your email</h2>
-            <p>Enter the code sent to {{ pendingEmail() }}.</p>
-            </div>
+    <form [formGroup]="loginForm" (ngSubmit)="login()">
+      <label for="auth-email">Email</label>
 
-            <button
-            type="button"
-            class="auth-close"
-            aria-label="Close verification"
-            (click)="close()"
-            >
-            ×
-            </button>
-        </header>
+      <input id="auth-email" type="email" formControlName="email" autocomplete="email" />
 
-        @if (errorMessage()) {
-            <p class="auth-error" role="alert">
-            {{ errorMessage() }}
-            </p>
-        }
+      @if (loginForm.controls.email.invalid && loginForm.controls.email.touched) {
+        <p class="auth-error">Please enter a valid email address.</p>
+      }
 
-        @if (successMessage()) {
-            <p class="auth-success" role="status">
-            {{ successMessage() }}
-            </p>
-        }
+      <label for="auth-password">Password</label>
 
-        <form [formGroup]="verifyForm" (ngSubmit)="verify()">
-            <label for="verification-code">Verification code</label>
+      <input
+        id="auth-password"
+        type="password"
+        formControlName="password"
+        autocomplete="current-password"
+      />
 
-            <input
-            id="verification-code"
-            type="text"
-            formControlName="code"
-            autocomplete="one-time-code"
-            />
+      <button type="submit" [disabled]="loading()">
+        {{ loading() ? 'Logging in...' : 'Log in' }}
+      </button>
+    </form>
 
-            <button type="submit">
-            Verify
-            </button>
-        </form>
+    <div class="auth-links">
+      <button type="button" (click)="showForgotPassword()">Forgot password?</button>
+
+      <button
+        type="button"
+        (click)="errorMessage.set(''); successMessage.set(''); mode.set('signup')"
+      >
+        Create an account
+      </button>
+    </div>
+  }
+
+  @if (mode() === 'forgot-password') {
+    <header class="auth-header">
+      <div>
+        <h2 id="auth-modal-heading">Forgot password</h2>
+        <p>Enter your account email to receive a reset code.</p>
+      </div>
+
+      <button type="button" class="auth-close" aria-label="Close password reset" (click)="close()">
+        ×
+      </button>
+    </header>
+
+    @if (errorMessage()) {
+      <p class="auth-error" role="alert">
+        {{ errorMessage() }}
+      </p>
     }
 
-    @if (mode() === 'complete-profile') {
-        <form
-            [formGroup]="completeProfileForm"
-            (ngSubmit)="completeProfile()"
-        >
-            <h2>Complete your account</h2>
-
-            <p>
-            Choose a display username to finish setting up your account.
-            </p>
-
-            <input
-            type="text"
-            formControlName="displayUsername"
-            placeholder="Display username"
-            />
-
-            <button
-            type="submit"
-            [disabled]="loading()"
-            >
-            Complete setup
-            </button>
-        </form>
+    @if (successMessage()) {
+      <p class="auth-success" role="status">
+        {{ successMessage() }}
+      </p>
     }
+
+    <form [formGroup]="forgotPasswordForm" (ngSubmit)="requestPasswordReset()">
+      <label for="forgot-password-email">Email</label>
+
+      <input id="forgot-password-email" type="email" formControlName="email" autocomplete="email" />
+
+      @if (forgotPasswordForm.controls.email.invalid && forgotPasswordForm.controls.email.touched) {
+        <p class="auth-error" role="alert">Please enter a valid email address.</p>
+      }
+
+      <button type="submit" [disabled]="loading()">
+        {{ loading() ? 'Sending code...' : 'Send reset code' }}
+      </button>
+    </form>
+
+    <div class="auth-links auth-links-single">
+      <button type="button" (click)="showLogin()">Back to login</button>
+    </div>
+  }
+
+  @if (mode() === 'reset-password') {
+    <header class="auth-header">
+      <div>
+        <h2 id="auth-modal-heading">Reset password</h2>
+        <p>Enter the code sent to {{ passwordResetEmail() }}.</p>
+      </div>
+
+      <button type="button" class="auth-close" aria-label="Close password reset" (click)="close()">
+        ×
+      </button>
+    </header>
+
+    @if (errorMessage()) {
+      <p class="auth-error" role="alert">
+        {{ errorMessage() }}
+      </p>
+    }
+
+    @if (successMessage()) {
+      <p class="auth-success" role="status">
+        {{ successMessage() }}
+      </p>
+    }
+
+    <form [formGroup]="resetPasswordForm" (ngSubmit)="confirmPasswordReset()">
+      <label for="reset-password-code">Verification code</label>
+
+      <input
+        id="reset-password-code"
+        type="text"
+        formControlName="code"
+        autocomplete="one-time-code"
+      />
+
+      <label for="reset-password-new">New password</label>
+      <p class="password-hint">
+        Password must meet the account security requirements with special characters and numbers.
+      </p>
+
+      <input
+        id="reset-password-new"
+        type="password"
+        formControlName="newPassword"
+        autocomplete="new-password"
+      />
+
+      <label for="reset-password-confirm">Confirm new password</label>
+
+      <input
+        id="reset-password-confirm"
+        type="password"
+        formControlName="confirmPassword"
+        autocomplete="new-password"
+      />
+
+      @if (
+        resetPasswordForm.controls.confirmPassword.touched &&
+        resetPasswordForm.controls.newPassword.value !==
+          resetPasswordForm.controls.confirmPassword.value
+      ) {
+        <p class="auth-error" role="alert">Passwords do not match.</p>
+      }
+
+      <button type="submit" [disabled]="loading()">
+        {{ loading() ? 'Resetting password...' : 'Reset password' }}
+      </button>
+    </form>
+
+    <div class="auth-links">
+      <button type="button" (click)="showForgotPassword()">Request another code</button>
+
+      <button type="button" (click)="showLogin()">Back to login</button>
+    </div>
+  }
+
+  @if (mode() === 'signup') {
+    <header class="auth-header">
+      <div>
+        <h2 id="auth-modal-heading">Create account</h2>
+        <p>Join K12Info.</p>
+      </div>
+
+      <button type="button" class="auth-close" aria-label="Close signup" (click)="close()">
+        ×
+      </button>
+    </header>
+
+    @if (errorMessage()) {
+      <p class="auth-error" role="alert">
+        {{ errorMessage() }}
+      </p>
+    }
+
+    @if (successMessage()) {
+      <p class="auth-success" role="status">
+        {{ successMessage() }}
+      </p>
+    }
+
+    <form [formGroup]="signupForm" (ngSubmit)="signup()">
+      <label for="signup-username">Display username</label>
+
+      <input
+        id="signup-username"
+        type="text"
+        formControlName="displayUsername"
+        autocomplete="username"
+      />
+
+      @if (
+        signupForm.controls.displayUsername.touched &&
+        signupForm.controls.displayUsername.hasError('required')
+      ) {
+        <p class="auth-error">Please enter a display username.</p>
+      }
+
+      @if (
+        signupForm.controls.displayUsername.invalid &&
+        signupForm.controls.displayUsername.touched &&
+        !signupForm.controls.displayUsername.hasError('required')
+      ) {
+        <p class="auth-error">
+          Username must be 3–20 characters and contain only letters, numbers, and underscores.
+        </p>
+      }
+
+      <label for="signup-email">Email</label>
+      <input id="signup-email" type="email" formControlName="email" autocomplete="email" />
+
+      @if (signupForm.controls.email.invalid && signupForm.controls.email.touched) {
+        <p class="auth-error">Please enter a valid email address.</p>
+      }
+
+      <label for="signup-password">Password</label>
+      <p class="password-hint">
+        Password must meet the account security requirements with special characters and numbers.
+      </p>
+      <input
+        id="signup-password"
+        type="password"
+        formControlName="password"
+        autocomplete="new-password"
+      />
+
+      <label for="signup-confirm-password"> Confirm password </label>
+
+      <input
+        id="signup-confirm-password"
+        type="password"
+        formControlName="confirmPassword"
+        autocomplete="new-password"
+      />
+
+      <button type="submit" [disabled]="loading()">
+        {{ loading() ? 'Creating account...' : 'Create account' }}
+      </button>
+    </form>
+
+    <div class="auth-links auth-links-single">
+      <button type="button" (click)="mode.set('login')">Back to login</button>
+    </div>
+  }
+
+  @if (mode() === 'verify') {
+    <header class="auth-header">
+      <div>
+        <h2 id="auth-modal-heading">Verify your email</h2>
+        <p>Enter the code sent to {{ pendingEmail() }}.</p>
+      </div>
+
+      <button type="button" class="auth-close" aria-label="Close verification" (click)="close()">
+        ×
+      </button>
+    </header>
+
+    @if (errorMessage()) {
+      <p class="auth-error" role="alert">
+        {{ errorMessage() }}
+      </p>
+    }
+
+    @if (successMessage()) {
+      <p class="auth-success" role="status">
+        {{ successMessage() }}
+      </p>
+    }
+
+    <form [formGroup]="verifyForm" (ngSubmit)="verify()">
+      <label for="verification-code">Verification code</label>
+
+      <input
+        id="verification-code"
+        type="text"
+        formControlName="code"
+        autocomplete="one-time-code"
+      />
+
+      <button type="submit">Verify</button>
+    </form>
+  }
+
+  @if (mode() === 'complete-profile') {
+    <form [formGroup]="completeProfileForm" (ngSubmit)="completeProfile()">
+      <h2>Complete your account</h2>
+
+      <p>Choose a display username to finish setting up your account.</p>
+
+      @if (errorMessage()) {
+        <p class="auth-error" role="alert">
+          {{ errorMessage() }}
+        </p>
+      }
+
+      @if (successMessage()) {
+        <p class="auth-success" role="status">
+          {{ successMessage() }}
+        </p>
+      }
+
+      <input type="text" formControlName="displayUsername" placeholder="Display username" />
+
+      @if (
+        completeProfileForm.controls.displayUsername.touched &&
+        completeProfileForm.controls.displayUsername.invalid
+      ) {
+        <p class="auth-error" role="alert">
+          Username must be 3–20 characters and contain only letters, numbers, and underscores.
+        </p>
+      }
+
+      <button type="submit" [disabled]="loading()">
+        {{ loading() ? 'Completing setup...' : 'Complete setup' }}
+      </button>
+    </form>
+  }
 </div>

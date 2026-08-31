@@ -11,6 +11,7 @@ import { ExplorerSchool } from '../explorer/models/explorer-school';
 import { SchoolDetailsResponse } from '../explorer/models/school-details-response';
 
 import { CommentsApi } from '../../services/comments-api';
+import { WebSocketService } from '../../services/websocket';
 
 import { SchoolComment } from '../../models/school-comment';
 
@@ -42,6 +43,7 @@ export class SchoolDetails implements OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly schoolsApi = inject(SchoolsApi);
   private readonly commentsApi = inject(CommentsApi);
+  private readonly websocket = inject(WebSocketService);
   readonly comments = signal<SchoolComment[]>([]);
 
   readonly commentsHasMore = signal(false);
@@ -82,11 +84,18 @@ export class SchoolDetails implements OnDestroy {
   readonly auth = inject(Auth);
   readonly isAuthenticated = this.auth.isAuthenticated;
 
-  // Public school streams need no bearer header, so native EventSource owns
-  // reconnection for the lifetime of this route component.
-  private commentStream: EventSource | null = null;
+  private releaseSchoolSubscription: (() => void) | null = null;
+  private readonly removeCommentListener: () => void;
 
   constructor() {
+    this.removeCommentListener = this.websocket.onCommentEvent((event) => {
+      if (event.event === 'comment-created') {
+        void this.handleCommentCreated(event.data.comment_id);
+      } else {
+        void this.handleCommentDeleted(event.data.comment_id);
+      }
+    });
+
     this.loadSchool();
 
     effect(() => {
@@ -106,46 +115,32 @@ export class SchoolDetails implements OnDestroy {
     });
   }
 
-  private openCommentStream(sector: 'public' | 'private', schoolId: string): void {
-    this.commentStream?.close();
+  private async handleCommentCreated(commentId: string): Promise<void> {
+    const school = this.school();
 
-    this.commentStream = new EventSource(`/api/schools/${sector}/${schoolId}/comments/stream`);
+    if (!school) {
+      return;
+    }
 
-    this.commentStream.addEventListener('comment-created', async (event) => {
-      const data = JSON.parse((event as MessageEvent).data);
+    try {
+      const response = await this.commentsApi.getSchoolComments(school.sector, school._id);
+      const newComment = response.comments.find((comment) => comment._id === commentId);
 
-      try {
-        const response = await this.commentsApi.getSchoolComments(sector, schoolId);
+      if (!newComment) {
+        return;
+      }
 
-        const newComment = response.comments.find((comment) => comment._id === data.comment_id);
-
-        if (!newComment) {
-          return;
+      this.comments.update((comments) => {
+        // Prevent duplicates in the posting tab, which receives its own event.
+        if (comments.some((comment) => comment._id === newComment._id)) {
+          return comments;
         }
 
-        this.comments.update((comments) => {
-          // Prevent duplicates in the posting tab,
-          // which receives its own SSE event.
-          if (comments.some((comment) => comment._id === newComment._id)) {
-            return comments;
-          }
-
-          return [newComment, ...comments];
-        });
-      } catch (error) {
-        console.error('Unable to retrieve new comment:', error);
-      }
-    });
-
-    this.commentStream.addEventListener('comment-deleted', (event) => {
-      const data = JSON.parse((event as MessageEvent).data);
-
-      void this.handleCommentDeleted(data.comment_id);
-    });
-
-    this.commentStream.onerror = (error) => {
-      console.error('Comment stream error:', error);
-    };
+        return [newComment, ...comments];
+      });
+    } catch (error) {
+      console.error('Unable to retrieve new comment:', error);
+    }
   }
 
   private async handleCommentDeleted(commentId: string): Promise<void> {
@@ -197,7 +192,8 @@ export class SchoolDetails implements OnDestroy {
 
       this.school.set(school);
 
-      this.openCommentStream(school.sector, school._id);
+      this.releaseSchoolSubscription?.();
+      this.releaseSchoolSubscription = this.websocket.subscribeSchool(school.sector, school._id);
 
       if (school.sector === 'public') {
         // Expanded CRDC collections are keyed by ncessch, not the route `_id`.
@@ -310,6 +306,7 @@ export class SchoolDetails implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.commentStream?.close();
+    this.releaseSchoolSubscription?.();
+    this.removeCommentListener();
   }
 }
