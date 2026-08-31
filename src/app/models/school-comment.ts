@@ -1,3 +1,7 @@
+/**
+ * Public school-comment projection. Ownership is computed only when optional
+ * authentication succeeds; the backend never exposes the stored `author_sub`.
+ */
 export interface SchoolComment {
   _id: string;
   school_id: string;

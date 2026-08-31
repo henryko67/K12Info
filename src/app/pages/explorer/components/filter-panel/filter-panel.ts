@@ -4,7 +4,7 @@ import { ExplorerStore } from '../../services/explorer-store';
 @Component({
   selector: 'app-filter-panel',
   templateUrl: './filter-panel.html',
-  styleUrl: './filter-panel.css'
+  styleUrl: './filter-panel.css',
 })
 export class FilterPanel {
   private readonly explorerStore = inject(ExplorerStore);
@@ -16,12 +16,10 @@ export class FilterPanel {
   readonly isOpen = signal(false);
 
   togglePanel(): void {
-    this.isOpen.update(open => !open);
+    this.isOpen.update((open) => !open);
   }
 
   setSector(value: 'all' | 'public' | 'private'): void {
-    console.log("Sector switch called");
-    console.log(value);
     this.explorerStore.setSectorFilter(value);
   }
 
@@ -46,9 +44,7 @@ export class FilterPanel {
   }
 
   setLunchProgram(value: string): void {
-    this.explorerStore.setPublicLunchProgram(
-      value === '' ? null : Number(value)
-    );
+    this.explorerStore.setPublicLunchProgram(value === '' ? null : Number(value));
   }
 
   setMaxRatio(value: string): void {
@@ -74,11 +70,8 @@ export class FilterPanel {
     this.explorerStore.togglePrivateSchoolType(type);
   }
 
-  toggleReligiousAffiliation(
-    affiliation: number
-  ): void {
-    this.explorerStore
-      .togglePrivateReligiousAffiliation(affiliation);
+  toggleReligiousAffiliation(affiliation: number): void {
+    this.explorerStore.togglePrivateReligiousAffiliation(affiliation);
   }
 
   clearFilters(): void {

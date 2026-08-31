@@ -1,18 +1,16 @@
 import { Service, signal } from '@angular/core';
 
+/** Maintains the application profile username and synchronizes it across tabs. */
 @Service()
 export class ProfileStore {
   readonly username = signal<string | null>(null);
 
-  private readonly profileChannel =
-    new BroadcastChannel('k12info-profile');
+  private readonly profileChannel = new BroadcastChannel('k12info-profile');
 
   constructor() {
     this.profileChannel.onmessage = (event) => {
       if (event.data.type === 'USERNAME_UPDATED') {
-        this.username.set(
-          event.data.username
-        );
+        this.username.set(event.data.username);
       }
 
       if (event.data.type === 'PROFILE_CLEARED') {
@@ -30,7 +28,7 @@ export class ProfileStore {
 
     this.profileChannel.postMessage({
       type: 'USERNAME_UPDATED',
-      username
+      username,
     });
   }
 
@@ -38,7 +36,7 @@ export class ProfileStore {
     this.username.set(null);
 
     this.profileChannel.postMessage({
-      type: 'PROFILE_CLEARED'
+      type: 'PROFILE_CLEARED',
     });
   }
 }

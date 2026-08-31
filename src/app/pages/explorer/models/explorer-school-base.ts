@@ -1,5 +1,4 @@
-import { SchoolAddress } from "./school-address";
-
+/** Fields normalized across public and private source datasets for Explorer use. */
 export interface ExplorerSchoolBase {
   _id: string;
 

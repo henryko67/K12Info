@@ -9,11 +9,11 @@ export class SchoolDetailsApi {
   private readonly http = inject(HttpClient);
   private readonly apiUrl = '/api/schools';
 
-  getDetails(
-    ncessch: string
-  ): Observable<SchoolDetailsResponse> {
-    return this.http.get<SchoolDetailsResponse>(
-      `${this.apiUrl}/public/${ncessch}/details`
-    );
+  /**
+   * Loads expanded CRDC data for a public school.
+   * @param ncessch Public NCES school identifier, not the routable base `_id`.
+   */
+  getDetails(ncessch: string): Observable<SchoolDetailsResponse> {
+    return this.http.get<SchoolDetailsResponse>(`${this.apiUrl}/public/${ncessch}/details`);
   }
 }

@@ -1,12 +1,12 @@
 import { ExplorerSchoolBase } from './explorer-school-base';
 
-export interface PublicExplorerSchool
-  extends ExplorerSchoolBase {
-
+export interface PublicExplorerSchool extends ExplorerSchoolBase {
   sector: 'public';
 
   ids: {
+    /** Source identifier retained separately from the MongoDB `_id`. */
     school_id: string;
+    /** Public NCES identifier used to retrieve expanded CRDC details. */
     ncessch: string;
     ncessch_num: number;
     leaid: string;
@@ -61,6 +61,7 @@ export interface PublicExplorerSchool
     };
   };
 
+  /** CCD and CRDC reporting years may differ, so their values need not align. */
   sources: {
     ccd: {
       name: string;

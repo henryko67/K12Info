@@ -5,12 +5,18 @@ import {
   signUp,
   confirmSignUp,
   getCurrentUser,
-  autoSignIn
+  autoSignIn,
 } from 'aws-amplify/auth';
 
 import { UserApi } from './user-api';
 import { ProfileStore } from './profile-store';
 
+/**
+ * Coordinates frontend authentication readiness for application UX.
+ * Backend JWT verification remains the security boundary. A valid Cognito
+ * session is not considered application-ready until its MongoDB profile has
+ * also been resolved; passwords remain exclusively in Cognito.
+ */
 @Service()
 export class Auth {
   readonly isAuthenticated = signal(false);
@@ -48,9 +54,7 @@ export class Auth {
     }
 
     try {
-      
-      const profile =
-        await this.userApi.getCurrentUserProfile();
+      const profile = await this.userApi.getCurrentUserProfile();
 
       if (!profile) {
         this.profileStore.clear();
@@ -58,16 +62,11 @@ export class Auth {
         return;
       }
 
-      this.profileStore.setUsername(
-        profile.username
-      );
+      this.profileStore.setUsername(profile.username);
 
       this.isAuthenticated.set(true);
     } catch (error) {
-      console.error(
-        'Unable to restore K12Info profile:',
-        error
-      );
+      console.error('Unable to restore K12Info profile:', error);
 
       this.profileStore.clear();
       this.isAuthenticated.set(false);
@@ -76,10 +75,7 @@ export class Auth {
     }
   }
 
-  async login(
-    email: string,
-    password: string
-  ): Promise<'SIGNED_IN' | 'CONFIRM_SIGN_UP'> {
+  async login(email: string, password: string): Promise<'SIGNED_IN' | 'CONFIRM_SIGN_UP'> {
     try {
       await getCurrentUser();
 
@@ -92,66 +88,41 @@ export class Auth {
 
     const result = await signIn({
       username: email,
-      password
+      password,
     });
 
     if (result.isSignedIn) {
-
       return 'SIGNED_IN';
     }
 
-    if (
-      result.nextStep.signInStep ===
-      'CONFIRM_SIGN_UP'
-    ) {
+    if (result.nextStep.signInStep === 'CONFIRM_SIGN_UP') {
       return 'CONFIRM_SIGN_UP';
     }
 
-    throw new Error(
-      `Unsupported sign-in step: ${result.nextStep.signInStep}`
-    );
+    throw new Error(`Unsupported sign-in step: ${result.nextStep.signInStep}`);
   }
 
   async signup(email: string, password: string): Promise<void> {
-    const result = await signUp({
+    await signUp({
       username: email,
       password,
       options: {
         userAttributes: {
-          email
+          email,
         },
-        autoSignIn: true
-      }
+        autoSignIn: true,
+      },
     });
-
-    console.log(
-      'Cognito confirmation step:',
-      result.nextStep.signUpStep
-    );
-
-    console.log(
-      'Full Cognito confirmation result:',
-      result
-    );
   }
 
-  async confirmSignup(
-    email: string,
-    code: string
-  ): Promise<boolean> {
+  async confirmSignup(email: string, code: string): Promise<boolean> {
     const result = await confirmSignUp({
       username: email,
-      confirmationCode: code
+      confirmationCode: code,
     });
 
-    console.log('Cognito confirmation result:', result);
-
-    if (
-      result.nextStep.signUpStep === 'COMPLETE_AUTO_SIGN_IN'
-    ) {
+    if (result.nextStep.signUpStep === 'COMPLETE_AUTO_SIGN_IN') {
       const signInResult = await autoSignIn();
-
-      console.log('Auto sign-in result:', signInResult);
 
       if (signInResult.nextStep.signInStep === 'DONE') {
         return true;
@@ -169,17 +140,13 @@ export class Auth {
     this.isAuthenticated.set(false);
     this.sessionResolved.set(true);
 
-    this.authChannel.postMessage(
-      'SIGNED_OUT'
-    );
+    this.authChannel.postMessage('SIGNED_OUT');
   }
 
   markAuthenticated(): void {
     this.isAuthenticated.set(true);
     this.sessionResolved.set(true);
 
-    this.authChannel.postMessage(
-      'SIGNED_IN'
-    );
+    this.authChannel.postMessage('SIGNED_IN');
   }
 }

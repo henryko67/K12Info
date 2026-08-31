@@ -8,12 +8,8 @@ export class SchoolsApi {
   private readonly http = inject(HttpClient);
   private readonly apiUrl = '/api/schools';
 
-  getSchoolById(
-    sector: 'public' | 'private',
-    id: string
-  ): Observable<ExplorerSchool> {
-    return this.http.get<ExplorerSchool>(
-      `${this.apiUrl}/${sector}/${id}`
-    );
+  /** Loads a base school document by the `_id` used in application routes. */
+  getSchoolById(sector: 'public' | 'private', id: string): Observable<ExplorerSchool> {
+    return this.http.get<ExplorerSchool>(`${this.apiUrl}/${sector}/${id}`);
   }
 }
