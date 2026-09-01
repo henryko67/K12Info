@@ -36,12 +36,18 @@ REST remains the authoritative path for data. A shared WebSocket connection carr
 flowchart LR
   UI[Angular components] --> Store[Signals and ExplorerStore]
   Store --> Map[Leaflet and marker clustering]
-  UI -->|/api REST| API[Serverless backend]
-  UI <-->|comment events| WS[API Gateway WebSocket]
-  API --> Data[(MongoDB and school datasets)]
-  UI --> Cognito[Amazon Cognito]
-  API --> Cognito
-```
+
+  UI -->|REST /api/*| API[HTTP API Gateway + Lambda]
+  API <--> Mongo[(MongoDB Atlas)]
+
+  UI -->|Authentication| Cognito[Amazon Cognito]
+  API -.->|JWT verification| Cognito
+
+  UI <-->|Subscriptions and comment events| Realtime[API Gateway WebSocket + Lambda]
+  Realtime <--> WSState[(DynamoDB connection state)]
+
+  API -->|Comment notifications| Realtime
+  ```
 
 ## Technology and deployment
 
