@@ -42,19 +42,29 @@ import {
 export class SchoolDetails implements OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly schoolsApi = inject(SchoolsApi);
-  private readonly commentsApi = inject(CommentsApi);
-  private readonly websocket = inject(WebSocketService);
-  readonly comments = signal<SchoolComment[]>([]);
-
-  readonly commentsHasMore = signal(false);
-
-  readonly commentsNextCursor = signal<string | null>(null);
   private readonly schoolDetailsApi = inject(SchoolDetailsApi);
   private readonly explorerStore = inject(ExplorerStore);
+  private readonly commentsApi = inject(CommentsApi);
+  private readonly websocket = inject(WebSocketService);
+  readonly auth = inject(Auth);
 
   readonly school = signal<ExplorerSchool | null>(null);
-
   readonly expandedDetails = signal<SchoolDetailsResponse | null>(null);
+  readonly isAuthenticated = this.auth.isAuthenticated;
+
+  readonly comments = signal<SchoolComment[]>([]);
+  readonly commentsHasMore = signal(false);
+  readonly commentsNextCursor = signal<string | null>(null);
+  readonly commentsLoading = signal(false);
+  readonly commentsLoadingMore = signal(false);
+  readonly commentsError = signal('');
+
+  readonly commentText = signal('');
+  readonly commentPosting = signal(false);
+  readonly commentPostError = signal('');
+
+  readonly loading = signal(true);
+  readonly errorMessage = signal('');
 
   readonly formatGrade = formatGrade;
   readonly formatSchoolLevel = formatSchoolLevel;
@@ -70,24 +80,12 @@ export class SchoolDetails implements OnDestroy {
   readonly showSecondaryPrograms = showSecondaryPrograms;
   readonly showPreschoolData = showPreschoolData;
 
-  readonly commentsLoading = signal(false);
-  readonly commentsLoadingMore = signal(false);
-  readonly commentsError = signal('');
-
-  readonly commentText = signal('');
-  readonly commentPosting = signal(false);
-  readonly commentPostError = signal('');
-
-  readonly loading = signal(true);
-  readonly errorMessage = signal('');
-
-  readonly auth = inject(Auth);
-  readonly isAuthenticated = this.auth.isAuthenticated;
-
   private releaseSchoolSubscription: (() => void) | null = null;
   private readonly removeCommentListener: () => void;
 
   constructor() {
+    // The connection is application-scoped, while listeners and school-topic
+    // leases are route-owned and released in ngOnDestroy.
     this.removeCommentListener = this.websocket.onCommentEvent((event) => {
       if (event.event === 'comment-created') {
         void this.handleCommentCreated(event.data.comment_id);
@@ -111,6 +109,8 @@ export class SchoolDetails implements OnDestroy {
         return;
       }
 
+      // Reloading on auth changes refreshes backend-computed ownership flags;
+      // changing schools also establishes the page's initial comment set.
       this.loadComments(school.sector, school._id);
     });
   }
@@ -123,6 +123,8 @@ export class SchoolDetails implements OnDestroy {
     }
 
     try {
+      // Realtime payloads are intentionally minimal, so retrieve the canonical
+      // comment (including ownership metadata) from the REST endpoint.
       const response = await this.commentsApi.getSchoolComments(school.sector, school._id);
       const newComment = response.comments.find((comment) => comment._id === commentId);
 
@@ -283,7 +285,15 @@ export class SchoolDetails implements OnDestroy {
     this.commentPostError.set('');
 
     try {
-      await this.commentsApi.createComment(school.sector, school._id, text);
+      const createdComment = await this.commentsApi.createComment(school.sector, school._id, text);
+
+      this.comments.update((comments) => {
+        if (comments.some((comment) => comment._id === createdComment._id)) {
+          return comments;
+        }
+
+        return [createdComment, ...comments];
+      });
 
       this.commentText.set('');
     } catch (error) {

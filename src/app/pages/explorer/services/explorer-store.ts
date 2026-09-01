@@ -14,9 +14,12 @@ import { SchoolDetailsResponse } from '../models/school-details-response';
   autoProvided: false,
 })
 export class ExplorerStore {
-  searchResponse = signal<SearchResponse | null>(null);
+  // Search suggestions are distinct from the schools currently rendered on
+  // the map; choosing a suggestion or location promotes results into the
+  // displayedSchools state below.
+  readonly searchResponse = signal<SearchResponse | null>(null);
 
-  schoolSearchResults = computed(() => {
+  readonly schoolSearchResults = computed(() => {
     const response = this.searchResponse();
 
     if (response === null) {
@@ -26,7 +29,7 @@ export class ExplorerStore {
     return response.schools;
   });
 
-  locationSearchResults = computed(() => {
+  readonly locationSearchResults = computed(() => {
     const response = this.searchResponse();
 
     if (response === null) {
@@ -36,7 +39,7 @@ export class ExplorerStore {
     return response.locations;
   });
 
-  paginationResults = computed(() => {
+  readonly paginationResults = computed(() => {
     const response = this.searchResponse();
 
     if (response === null) {
@@ -54,9 +57,12 @@ export class ExplorerStore {
     this.searchResponse.set(null);
   }
 
-  selectedSchool = signal<ExplorerSchool | null>(null);
+  readonly selectedSchool = signal<ExplorerSchool | null>(null);
 
   selectSchool(school: ExplorerSchool): void {
+    // Selection is the synchronization point for map highlighting, sidebar
+    // scrolling, and preview visibility. Expanded details never carry across
+    // to a newly selected school.
     this.selectedSchool.set(school);
     this.openPreview();
     this.schoolDetails.set(null);
@@ -88,7 +94,7 @@ export class ExplorerStore {
     });
   }
 
-  displayedSchools = signal<ExplorerSchool[]>([]);
+  readonly displayedSchools = signal<ExplorerSchool[]>([]);
 
   addDisplayedSchool(school: ExplorerSchool): void {
     this.displayedSchools.set([school]);
@@ -98,23 +104,21 @@ export class ExplorerStore {
     this.displayedSchools.set(schools);
   }
 
-  clearDisplayedSchools(): void {
-    this.displayedSchools.set([]);
-  }
-
   readonly focusRequest = signal<{
     school: ExplorerSchool;
     requestId: number;
   } | null>(null);
 
   focusSchool(school: ExplorerSchool): void {
+    // A request token makes repeated selections of the same school observable
+    // to the map effect, where a plain selectedSchool signal would not rerun.
     this.focusRequest.set({
       school,
       requestId: Date.now(),
     });
   }
 
-  previewOpen = signal(false);
+  readonly previewOpen = signal(false);
 
   openPreview(): void {
     this.previewOpen.set(true);
@@ -124,13 +128,13 @@ export class ExplorerStore {
     this.previewOpen.set(false);
   }
 
-  resultsSidebarOpen = signal(true);
+  readonly resultsSidebarOpen = signal(true);
 
   toggleResultsSidebar(): void {
     this.resultsSidebarOpen.update((open) => !open);
   }
 
-  publicFilters = signal({
+  readonly publicFilters = signal({
     levels: [] as number[],
     maxStudentTeacherRatio: null as number | null,
     apOnly: false,
@@ -142,14 +146,14 @@ export class ExplorerStore {
     schoolTypes: [] as number[],
   });
 
-  privateFilters = signal({
+  readonly privateFilters = signal({
     levels: [] as number[],
     maxStudentTeacherRatio: null as number | null,
     religiousAffiliations: [] as number[],
     schoolTypes: [] as number[],
   });
 
-  sectorFilter = signal<'all' | 'public' | 'private'>('all');
+  readonly sectorFilter = signal<'all' | 'public' | 'private'>('all');
 
   setSectorFilter(value: 'all' | 'public' | 'private'): void {
     this.sectorFilter.set(value);
@@ -307,6 +311,8 @@ export class ExplorerStore {
   }
 
   readonly filteredSchools = computed(() => {
+    // Both the map and results sidebar consume this computed signal so filters
+    // cannot leave their visible school sets out of sync.
     const schools = this.displayedSchools();
 
     const sector = this.sectorFilter();
@@ -432,11 +438,7 @@ export class ExplorerStore {
     });
   }
 
-  clearSchoolDetails(): void {
-    this.schoolDetails.set(null);
-  }
-
-  detailsOpen = signal(false);
+  readonly detailsOpen = signal(false);
 
   openDetails(): void {
     this.detailsOpen.set(true);

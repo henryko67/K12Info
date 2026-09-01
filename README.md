@@ -1,59 +1,73 @@
-# Frontend
+# K12Info frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.1.5.
+**[View the live production site](https://k12info.com)**
 
-## Development server
+K12Info is an interactive school-discovery application for exploring U.S. public and private schools. It brings school location, enrollment, classification, program, staffing, and civil-rights data into a searchable map experience, with deep-linked school profiles and real-time community comments.
 
-To start a local development server, run:
+This repository contains the Angular frontend. It communicates with a separately deployed serverless backend repository through REST endpoints and an API Gateway WebSocket endpoint.
 
-```bash
-ng serve
+## Product highlights
+
+- Search for schools and geographic locations, then explore results on a synchronized Leaflet map and results sidebar.
+- Filter public and private schools while respecting the different source schemas used by each sector.
+- Open bookmarkable school pages with base NCES data and expanded CRDC details where available.
+- Create Cognito-backed accounts with a separate MongoDB application profile and editable display username.
+- Receive real-time comment creation and deletion updates across school pages, account settings, and browser tabs.
+- Switch between responsive light and dark themes and map tile layers.
+
+## Frontend architecture
+
+K12Info uses standalone Angular components and signals for UI state. `ExplorerStore` owns the state shared among search, filters, map markers, the results list, selection, preview, and expanded details. Focus requests bridge this declarative state into Leaflet's imperative map API without making the map the source of truth.
+
+Authentication has two related layers: Amazon Cognito owns credentials and session identity, while the backend stores application profiles and usernames in MongoDB. The UI is considered ready only after both the Cognito session and its application profile are resolved. `BroadcastChannel` keeps auth and profile changes synchronized across tabs.
+
+REST remains the authoritative path for data. A shared WebSocket connection carries lightweight comment events; consumers then reconcile the affected comment through REST. Anonymous connections receive public school-topic events, while authenticated connections use a short-lived backend ticket and additionally receive user-topic events. School subscriptions survive reconnects and are released with the owning route.
+
+```mermaid
+flowchart LR
+  UI[Angular components] --> Store[Signals and ExplorerStore]
+  Store --> Map[Leaflet and marker clustering]
+  UI -->|/api REST| API[Serverless backend]
+  UI <-->|comment events| WS[API Gateway WebSocket]
+  API --> Data[(MongoDB and school datasets)]
+  UI --> Cognito[Amazon Cognito]
+  API --> Cognito
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+## Technology and deployment
 
-## Code scaffolding
+- Angular 22, TypeScript, Angular signals, reactive forms, and RxJS
+- Leaflet with marker clustering for geospatial exploration
+- AWS Amplify Auth with Amazon Cognito
+- Vitest through Angular's unit-test builder
+- GitHub Actions deployment using OIDC: production build → Amazon S3 → Amazon CloudFront cache invalidation
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+The browser uses relative `/api` URLs. During local development, Angular's proxy forwards them to the deployed backend; in production, the CloudFront/API configuration routes the same paths to the serverless API. WebSocket traffic connects directly to the configured API Gateway stage.
 
-```bash
-ng generate component component-name
-```
+## Local development
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
+Prerequisites: Node.js (the version in `.nvmrc`) and npm.
 
 ```bash
-ng build
+npm ci
+npm start
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+Open <http://localhost:4200>. The development server uses `proxy.conf.json` for backend API requests.
 
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+Useful checks:
 
 ```bash
-ng test
+npm test
+npm run build
 ```
 
-## Running end-to-end tests
+The production build is emitted to `dist/frontend/browser/`.
 
-For end-to-end (e2e) testing, run:
+## Repository guide
 
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- `src/app/pages/explorer/` — search, filters, map, results, previews, and shared Explorer state
+- `src/app/pages/school-details/` — deep-linked school data and comment experience
+- `src/app/pages/settings/` — profile editing and the authenticated user's comments
+- `src/app/services/` — authentication, profile, REST, theme, and WebSocket coordination
+- `.github/workflows/deploy.yml` — S3/CloudFront production deployment

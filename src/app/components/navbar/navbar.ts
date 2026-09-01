@@ -13,16 +13,15 @@ import { AuthModal } from '../auth-modal/auth-modal';
 })
 export class Navbar {
   private readonly themeService = inject(ThemeService);
+  readonly auth = inject(Auth);
 
   readonly theme = this.themeService.theme;
+  readonly authOpen = signal(false);
+  readonly accountOpen = signal(false);
 
   toggleTheme(): void {
     this.themeService.toggleTheme();
   }
-
-  readonly auth = inject(Auth);
-
-  readonly authOpen = signal(false);
 
   openAuth(): void {
     this.authOpen.set(true);
@@ -31,8 +30,6 @@ export class Navbar {
   closeAuth(): void {
     this.authOpen.set(false);
   }
-
-  readonly accountOpen = signal(false);
 
   toggleAccount(): void {
     this.accountOpen.update(open => !open);

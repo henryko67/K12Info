@@ -56,6 +56,9 @@ export class WebSocketService implements OnDestroy {
       return;
     }
 
+    // Authentication changes require a new connection: anonymous clients use
+    // the public URL, while signed-in clients exchange their JWT for a short-
+    // lived WebSocket ticket that also enables their user-specific topic.
     this.lastAuthenticatedState = authenticated;
     this.restart(authenticated);
   });
@@ -114,6 +117,8 @@ export class WebSocketService implements OnDestroy {
   }
 
   private restart(authenticated: boolean): void {
+    // Generation invalidates callbacks and ticket requests from the socket
+    // being replaced, preventing a late completion from reclaiming ownership.
     this.intentionallyDisconnected = false;
     this.generation += 1;
     this.clearReconnectTimer();
@@ -149,6 +154,8 @@ export class WebSocketService implements OnDestroy {
         this.reconnectDelay = INITIAL_RECONNECT_DELAY_MS;
         this.connectionState.set('connected');
 
+        // School topic intent outlives individual socket instances and must be
+        // replayed after reconnecting.
         if (this.activeSchool) {
           this.sendSchoolAction('subscribe-school', this.activeSchool);
         }
@@ -200,6 +207,8 @@ export class WebSocketService implements OnDestroy {
       return;
     }
 
+    // Retry with the same auth mode until an auth transition starts a new
+    // generation; authenticated attempts mint a fresh ticket each time.
     this.connectionState.set('reconnecting');
     const delay = this.reconnectDelay;
     this.reconnectDelay = Math.min(this.reconnectDelay * 2, MAX_RECONNECT_DELAY_MS);

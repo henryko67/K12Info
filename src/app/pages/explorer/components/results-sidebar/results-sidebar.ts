@@ -22,7 +22,7 @@ export class ResultsSidebar {
   private readonly explorerStore = inject(ExplorerStore);
   private readonly injector = inject(Injector);
 
-  //readonly displayedSchools = this.explorerStore.displayedSchools;
+  // Keep the list identical to the map's filtered marker set.
   readonly displayedSchools = this.explorerStore.filteredSchools;
   readonly isOpen = this.explorerStore.resultsSidebarOpen;
 
@@ -57,7 +57,9 @@ export class ResultsSidebar {
     });
   }
 
-  ngAfterViewInit() {
+  ngAfterViewInit(): void {
+    // ViewChildren is not available until the view exists; the injector binds
+    // this signal effect to the component lifecycle.
     effect(
       () => {
         this.scrollToSelectedSchool();

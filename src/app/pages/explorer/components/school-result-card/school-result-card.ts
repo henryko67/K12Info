@@ -10,8 +10,8 @@ import { ExplorerSchool } from '../../models/explorer-school';
   styleUrl: './school-result-card.css'
 })
 export class SchoolResultCard {
-  school = input.required<ExplorerSchool>();
-  schoolSelected = output<ExplorerSchool>();
+  readonly school = input.required<ExplorerSchool>();
+  readonly schoolSelected = output<ExplorerSchool>();
 
   private readonly explorerStore = inject(ExplorerStore);
 

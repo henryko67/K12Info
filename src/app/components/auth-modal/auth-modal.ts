@@ -160,6 +160,8 @@ export class AuthModal {
   });
 
   constructor() {
+    // Verification state spans reloads in this tab; the pending signup record
+    // carries the MongoDB username that Cognito itself does not own.
     const pendingSignup = this.getPendingSignup();
 
     const wasVerifying = sessionStorage.getItem('authPendingVerification') === 'true';
@@ -190,7 +192,8 @@ export class AuthModal {
     this.loading.set(true);
 
     try {
-      // Check K12Info/Mongo username availability
+      // Reserve the application-facing MongoDB username before creating the
+      // separate Cognito identity.
       const available = await this.userApi.checkUsernameAvailability(displayUsername.trim());
 
       if (!available) {
@@ -198,7 +201,6 @@ export class AuthModal {
         return;
       }
 
-      // Then create the Cognito account
       await this.auth.signup(email.trim(), password);
 
       this.savePendingSignup(email.trim(), displayUsername.trim());
@@ -475,6 +477,8 @@ export class AuthModal {
 
   @HostListener('window:storage', ['$event'])
   onStorageChange(event: StorageEvent): void {
+    // localStorage events arrive only in other tabs. Clearing pendingSignup in
+    // the completing tab returns any sibling verification modal to login.
     if (event.key === 'pendingSignup' && event.newValue === null && this.mode() === 'verify') {
       this.mode.set('login');
       this.pendingEmail.set('');

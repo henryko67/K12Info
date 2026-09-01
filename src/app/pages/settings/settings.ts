@@ -21,15 +21,12 @@ import { UserComment } from '../../models/user-comment';
 })
 export class Settings implements OnDestroy {
   private readonly userApi = inject(UserApi);
-
   private readonly profileStore = inject(ProfileStore);
-
   private readonly auth = inject(Auth);
-
   private readonly router = inject(Router);
-
   private readonly commentsApi = inject(CommentsApi);
   private readonly websocket = inject(WebSocketService);
+
   private readonly removeCommentListener: () => void;
 
   readonly errorMessage = signal('');
@@ -62,7 +59,11 @@ export class Settings implements OnDestroy {
     }),
   });
 
+  private initialLoadsStarted = false;
+
   private readonly syncUsernameEffect = effect(() => {
+    // ProfileStore is shared with the navbar/auth flow and may update from a
+    // sibling tab; avoid treating synchronization as a user form edit.
     const username = this.profileStore.username();
 
     if (username) {
@@ -77,12 +78,23 @@ export class Settings implements OnDestroy {
 
     const authenticated = this.auth.isAuthenticated();
 
+    // Wait for session restoration before redirecting so a valid Cognito
+    // session is not mistaken for a signed-out initial signal value.
     if (resolved && !authenticated) {
       this.router.navigate(['/']);
+      return;
+    }
+
+    if (resolved && authenticated && !this.initialLoadsStarted) {
+      this.initialLoadsStarted = true;
+      void this.loadProfile();
+      void this.loadComments();
     }
   });
 
   constructor() {
+    // Authenticated sockets also receive the user's comment topic, allowing
+    // this page to reconcile changes made from another tab or school page.
     this.removeCommentListener = this.websocket.onCommentEvent((event) => {
       if (event.event === 'comment-created') {
         void this.handleCommentCreated(event.data.comment_id);
@@ -90,9 +102,6 @@ export class Settings implements OnDestroy {
         void this.handleCommentDeleted(event.data.comment_id);
       }
     });
-
-    this.loadProfile();
-    this.loadComments();
   }
 
   private async loadProfile(): Promise<void> {
@@ -162,6 +171,8 @@ export class Settings implements OnDestroy {
   }
 
   private async handleCommentCreated(commentId: string): Promise<void> {
+    // Re-fetch through REST because realtime events deliberately carry only an
+    // identifier; the paged endpoint remains authoritative for comment data.
     try {
       const response = await this.commentsApi.getCurrentUserComments();
 

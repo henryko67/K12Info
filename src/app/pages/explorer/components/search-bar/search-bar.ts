@@ -29,12 +29,29 @@ import { LocationSearchResult } from '../../models/location-search-result';
 })
 export class SearchBar {
   private readonly searchApi = inject(SearchApi);
+  private readonly locationsApi = inject(LocationsApi);
   private readonly schoolsApi = inject(SchoolsApi);
   private readonly explorerStore = inject(ExplorerStore);
-
   private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
 
   private currentQuery = "";
+  private searchRequestId = 0;
+
+  readonly schoolSearchResults =
+    this.explorerStore.schoolSearchResults;
+
+  readonly locationSearchResults =
+    this.explorerStore.locationSearchResults;
+
+  readonly paginationResults = this.explorerStore.paginationResults;
+
+  readonly searchForm = new FormGroup({
+    query: new FormControl('', { nonNullable: true })
+  });
+
+  readonly resultsOpen = signal(false);
+  readonly loadingMoreLocations = signal(false);
+  readonly loadingMoreSchools = signal(false);
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
@@ -51,20 +68,6 @@ export class SearchBar {
     }
   }
 
-  readonly schoolSearchResults =
-    this.explorerStore.schoolSearchResults;
-
-  readonly locationSearchResults =
-    this.explorerStore.locationSearchResults;
-
-  readonly paginationResults = this.explorerStore.paginationResults;
-
-  searchForm = new FormGroup({
-    query: new FormControl('', { nonNullable: true })
-  });
-
-  resultsOpen = signal(false);
-
   onSearch(): void {
     const query = this.searchForm.controls.query.value.trim();
 
@@ -73,18 +76,31 @@ export class SearchBar {
     }
 
     if (this.currentQuery !== query) {
+      // Results from a different query must not retain the prior selection;
+      // pagination for the same query can safely append to existing state.
       this.explorerStore.clearSearch();
       this.explorerStore.clearSelectedSchool();
     }
 
-    this.searchApi.search(query).subscribe(response => {
-      this.explorerStore.setSearchResponse(response);
-      this.resultsOpen.set(true);
-      this.currentQuery = query;
+    const requestId = ++this.searchRequestId;
+
+    this.searchApi.search(query).subscribe({
+      next: response => {
+        if (requestId !== this.searchRequestId) {
+          return;
+        }
+
+        this.explorerStore.setSearchResponse(response);
+        this.resultsOpen.set(true);
+        this.currentQuery = query;
+      },
+      error: error => {
+        if (requestId === this.searchRequestId) {
+          console.error('Failed to search schools and locations:', error);
+        }
+      }
     });
   }
-
-  loadingMoreLocations = signal(false);
 
   onLoadMoreLocations(): void {
     const pagination = this.paginationResults();
@@ -121,8 +137,6 @@ export class SearchBar {
         }
       });
   }
-
-  loadingMoreSchools = signal(false);
 
   onLoadMoreSchools(): void {
     const pagination = this.paginationResults();
@@ -183,24 +197,27 @@ export class SearchBar {
     });
   }
 
-  //location stuff
-
-  private readonly locationsApi = inject(LocationsApi);
-
   onSelectLocation(location: LocationSearchResult): void {
     this.resultsOpen.set(false);
 
     this.locationsApi
       .getSchoolsByLocation(location._id)
-      .subscribe(response => {
-        const schools = [
-          ...response.publicResults,
-          ...response.privateResults
-        ];
+      .subscribe({
+        next: response => {
+          // Location search results contain a location identity, not map-ready
+          // school documents, so resolve both sectors before updating Explorer.
+          const schools = [
+            ...response.publicResults,
+            ...response.privateResults
+          ];
 
-        this.explorerStore.setDisplayedSchools(schools);
-        this.explorerStore.clearSelectedSchool();
-        this.explorerStore.closePreview();
+          this.explorerStore.setDisplayedSchools(schools);
+          this.explorerStore.clearSelectedSchool();
+          this.explorerStore.closePreview();
+        },
+        error: error => {
+          console.error('Failed to load schools for location:', error);
+        }
       });
   }
 
@@ -209,10 +226,15 @@ export class SearchBar {
 
     this.schoolsApi
       .getSchoolById(school.sector, school._id)
-      .subscribe(fullSchool => {
-        this.explorerStore.addDisplayedSchool(fullSchool);
-        this.explorerStore.selectSchool(fullSchool);
-        this.explorerStore.focusSchool(fullSchool);
+      .subscribe({
+        next: fullSchool => {
+          this.explorerStore.addDisplayedSchool(fullSchool);
+          this.explorerStore.selectSchool(fullSchool);
+          this.explorerStore.focusSchool(fullSchool);
+        },
+        error: error => {
+          console.error('Failed to load school:', error);
+        }
       });
   }
 }

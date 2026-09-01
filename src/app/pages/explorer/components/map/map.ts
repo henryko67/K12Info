@@ -24,15 +24,14 @@ const L = (window as typeof window & { L: typeof Leaflet }).L;
   styleUrl: './map.css'
 })
 export class Map implements AfterViewInit, OnDestroy {
-  
   private readonly injector = inject(Injector);
+  private readonly explorerStore = inject(ExplorerStore);
+  private readonly mapSearchApi = inject(MapSearchApi);
 
-  private explorerStore = inject(ExplorerStore);
-
-  //readonly displayedSchools = this.explorerStore.displayedSchools;
+  // The map and sidebar intentionally share the filtered projection.
   readonly displayedSchools = this.explorerStore.filteredSchools;
-
-  //Marker cluster code
+  readonly selectedSchool = this.explorerStore.selectedSchool;
+  readonly focusRequest = this.explorerStore.focusRequest;
 
   private readonly markerClusterGroup: Leaflet.MarkerClusterGroup =
     L.markerClusterGroup({
@@ -75,8 +74,6 @@ export class Map implements AfterViewInit, OnDestroy {
     }
   }
 
-  //Map generation basic code and settings
-
   private readonly osmLayer = L.tileLayer(
     'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
     {
@@ -118,11 +115,6 @@ export class Map implements AfterViewInit, OnDestroy {
   private map!: Leaflet.Map;
   private resizeObserver?: ResizeObserver;
 
-  // Focusing on marker
-
-  readonly selectedSchool = this.explorerStore.selectedSchool;
-
-  // 1. Leaflet icon definitions
   private readonly schoolMarkers = new globalThis.Map<string, Leaflet.Marker>();
 
   private readonly normalMarkerIcon = L.icon({
@@ -157,8 +149,6 @@ export class Map implements AfterViewInit, OnDestroy {
     }
   }
 
-  readonly focusRequest = this.explorerStore.focusRequest;
-
   private focusRequestedSchool(): void {
     const request = this.focusRequest();
 
@@ -172,10 +162,6 @@ export class Map implements AfterViewInit, OnDestroy {
     this.map.setView([latitude, longitude], 14);
   }
 
-  //Search area button
-
-  private readonly mapSearchApi = inject(MapSearchApi);
-
 onSearchThisArea(): void {
   const bounds = this.map.getBounds();
 
@@ -186,15 +172,20 @@ onSearchThisArea(): void {
 
   this.mapSearchApi
     .searchByBounds(north, south, east, west)
-    .subscribe(response => {
-      const schools = [
-        ...response.publicResults,
-        ...response.privateResults
-      ];
+    .subscribe({
+      next: response => {
+        const schools = [
+          ...response.publicResults,
+          ...response.privateResults
+        ];
 
-      this.explorerStore.clearSelectedSchool();
-      this.explorerStore.closePreview();
-      this.explorerStore.setDisplayedSchools(schools);
+        this.explorerStore.clearSelectedSchool();
+        this.explorerStore.closePreview();
+        this.explorerStore.setDisplayedSchools(schools);
+      },
+      error: error => {
+        console.error('Failed to search the visible map area:', error);
+      }
     });
 }
 
@@ -218,6 +209,8 @@ onSearchThisArea(): void {
     this.markerClusterGroup.addTo(this.map);
 
     if (typeof ResizeObserver !== 'undefined') {
+      // The preview and results panels resize the map without a window resize;
+      // Leaflet must be notified so tiles and interaction bounds stay correct.
       this.resizeObserver = new ResizeObserver(() => {
         this.map.invalidateSize({ animate: false, pan: false });
       });
@@ -225,6 +218,8 @@ onSearchThisArea(): void {
       this.resizeObserver.observe(this.mapContainer.nativeElement);
     }
 
+    // These effects bridge Angular signal state into Leaflet's imperative API
+    // and inherit this view's injector lifecycle.
     effect(() => {
       this.renderMarkers();
     },

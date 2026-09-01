@@ -1,6 +1,6 @@
 import { Service, signal } from '@angular/core';
 
-/** Maintains the application profile username and synchronizes it across tabs. */
+/** Maintains the MongoDB-backed display username independently of Cognito identity. */
 @Service()
 export class ProfileStore {
   readonly username = signal<string | null>(null);
@@ -8,6 +8,8 @@ export class ProfileStore {
   private readonly profileChannel = new BroadcastChannel('k12info-profile');
 
   constructor() {
+    // Profile edits and sign-out clear sibling tabs without persisting a second
+    // source of truth in browser storage.
     this.profileChannel.onmessage = (event) => {
       if (event.data.type === 'USERNAME_UPDATED') {
         this.username.set(event.data.username);

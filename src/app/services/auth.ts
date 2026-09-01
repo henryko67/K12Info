@@ -33,10 +33,12 @@ export class Auth {
   constructor() {
     this.restoreSession();
 
+    // BroadcastChannel updates sibling tabs immediately; each tab still owns
+    // its own Cognito session and in-memory profile state.
     this.authChannel.onmessage = (event) => {
       if (event.data === 'SIGNED_IN') {
-        this.isAuthenticated.set(true);
-        this.sessionResolved.set(true);
+        this.sessionResolved.set(false);
+        void this.restoreSession();
       }
 
       if (event.data === 'SIGNED_OUT') {
@@ -59,6 +61,9 @@ export class Auth {
   }
 
   private async restoreSession(): Promise<void> {
+    // Cognito proves identity, while the MongoDB profile supplies application
+    // state such as the display username. Both must resolve before the UI is
+    // considered authenticated and ready.
     try {
       await getCurrentUser();
     } catch {
@@ -94,11 +99,11 @@ export class Auth {
     try {
       await getCurrentUser();
 
-      // Cognito session already exists.
-      // Let AuthModal continue into Mongo profile recovery.
+      // An existing Cognito session may still lack its MongoDB profile, so the
+      // modal continues through profile recovery before marking the app ready.
       return 'SIGNED_IN';
     } catch {
-      // No Cognito session. Perform a normal login.
+      // No restorable session; continue with the requested credential login.
     }
 
     const result = await signIn({

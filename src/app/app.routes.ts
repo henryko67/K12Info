@@ -19,6 +19,8 @@ export const routes: Routes = [
     component: About
   },
   {
+    // SchoolDetails can hydrate itself from the URL when no Explorer selection
+    // survives a refresh or direct link.
     path: 'school/:sector/:id',
     component: SchoolDetails
   },

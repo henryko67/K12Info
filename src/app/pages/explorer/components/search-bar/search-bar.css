@@ -119,7 +119,7 @@
   text-transform: uppercase;
 }
 
-/* Apply one of these classes to future clickable location and school rows. */
+/* Shared presentation for current result buttons and supported row variants. */
 .search-result,
 .search-result-item,
 .search-results section > button,

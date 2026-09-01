@@ -29,12 +29,14 @@ import {
 export class SchoolPreview {
   private readonly explorerStore = inject(ExplorerStore);
   private readonly router = inject(Router);
+  readonly schoolDetailsApi = inject(SchoolDetailsApi);
 
   readonly expandedDetails = computed(
     () => this.explorerStore.schoolDetails()?.details ?? null
   );
 
   readonly selectedSchool = this.explorerStore.selectedSchool;
+  readonly detailsOpen = this.explorerStore.detailsOpen;
 
   readonly formatGrade = formatGrade;
   readonly formatSchoolLevel = formatSchoolLevel;
@@ -76,9 +78,6 @@ export class SchoolPreview {
     return school.classification?.religion ?? 'Unavailable';
   }
 
-  readonly schoolDetailsApi = inject(SchoolDetailsApi);
-  readonly detailsOpen = this.explorerStore.detailsOpen;
-
   onMoreDetails(): void {
     const school = this.explorerStore.selectedSchool();
 
@@ -102,9 +101,14 @@ export class SchoolPreview {
 
     this.schoolDetailsApi
       .getDetails(school.ids.ncessch)
-      .subscribe(details => {
-        this.explorerStore.setSchoolDetails(school.ids.ncessch, details);
-        this.explorerStore.openDetails();
+      .subscribe({
+        next: details => {
+          this.explorerStore.setSchoolDetails(school.ids.ncessch, details);
+          this.explorerStore.openDetails();
+        },
+        error: error => {
+          console.error('Failed to load expanded school details:', error);
+        }
       });
   }
 
