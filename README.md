@@ -6,6 +6,15 @@ K12Info is an interactive school-discovery application for exploring U.S. public
 
 This repository contains the Angular frontend. It communicates with a separately deployed serverless backend repository through REST endpoints and an API Gateway WebSocket endpoint.
 
+## Test Account
+
+A shared test account is available for reviewers who would like to explore authenticated features without creating an account.
+
+**Email:** `demo@k12info.com`  
+**Password:** `&9\cbY20@mXX`
+
+The test account has the same permissions as a standard K12Info user.
+
 ## Product highlights
 
 - Search for schools and geographic locations, then explore results on a synchronized Leaflet map and results sidebar.
