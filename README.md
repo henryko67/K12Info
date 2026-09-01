@@ -10,7 +10,7 @@ This repository contains the Angular frontend. It communicates with a separately
 
 - Search for schools and geographic locations, then explore results on a synchronized Leaflet map and results sidebar.
 - Filter public and private schools while respecting the different source schemas used by each sector.
-- Open bookmarkable school pages with base NCES data and expanded CRDC details where available.
+- Open directly linkable school pages with base NCES data and expanded CRDC details where available.
 - Create Cognito-backed accounts with a separate MongoDB application profile and editable display username.
 - Receive real-time comment creation and deletion updates across school pages, account settings, and browser tabs.
 - Switch between responsive light and dark themes and map tile layers.

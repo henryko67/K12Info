@@ -27,6 +27,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Run tests
+        run: npm test -- --watch=false
+
+      - name: Build production frontend
+        run: npm run build
+
       - name: Build production frontend
         run: npm run build
 
