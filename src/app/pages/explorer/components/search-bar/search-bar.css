@@ -142,6 +142,20 @@
   text-align: center;
 }
 
+.search-result > span {
+  display: block;
+}
+
+.search-result > span:first-child {
+  font-weight: 600;
+}
+
+.search-result > span + span {
+  margin-top: 0.25rem;
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+}
+
 .search-result:hover,
 .search-result-item:hover,
 .search-results section > button:hover,

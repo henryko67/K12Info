@@ -13,8 +13,9 @@ import { ExplorerStore } from '../../services/explorer-store';
 
 import { MapSearchApi } from '../../services/map-search-api';
 
-import * as L from 'leaflet';
-import 'leaflet.markercluster';
+import type * as Leaflet from 'leaflet';
+
+const L = (window as typeof window & { L: typeof Leaflet }).L;
 
 @Component({
   selector: 'app-map',
@@ -33,7 +34,7 @@ export class Map implements AfterViewInit, OnDestroy {
 
   //Marker cluster code
 
-  private readonly markerClusterGroup: L.MarkerClusterGroup =
+  private readonly markerClusterGroup: Leaflet.MarkerClusterGroup =
     L.markerClusterGroup({
       disableClusteringAtZoom: 12
     });
@@ -56,7 +57,7 @@ export class Map implements AfterViewInit, OnDestroy {
     }
 
     if (schools.length > 1) {
-      const coordinates: L.LatLngExpression[] = schools.map(school => {
+      const coordinates: Leaflet.LatLngExpression[] = schools.map(school => {
         const [longitude, latitude] = school.location.coordinates;
         return [latitude, longitude];
       });
@@ -94,17 +95,17 @@ export class Map implements AfterViewInit, OnDestroy {
     }
   );
 
-  private readonly baseLayers: L.Control.LayersObject = {
+  private readonly baseLayers: Leaflet.Control.LayersObject = {
     'OpenStreetMap': this.osmLayer,
     'Satellite': this.satelliteLayer
   };
 
-  private readonly layersControlOptions: L.Control.LayersOptions = {
+  private readonly layersControlOptions: Leaflet.Control.LayersOptions = {
     position: 'topright',
     collapsed: false
   };
 
-  private readonly initialCenter: L.LatLngExpression = [
+  private readonly initialCenter: Leaflet.LatLngExpression = [
     40.967243,
     -95.771556
   ];
@@ -114,7 +115,7 @@ export class Map implements AfterViewInit, OnDestroy {
   @ViewChild('mapContainer')
   mapContainer!: ElementRef<HTMLDivElement>;
 
-  private map!: L.Map;
+  private map!: Leaflet.Map;
   private resizeObserver?: ResizeObserver;
 
   // Focusing on marker
@@ -122,7 +123,7 @@ export class Map implements AfterViewInit, OnDestroy {
   readonly selectedSchool = this.explorerStore.selectedSchool;
 
   // 1. Leaflet icon definitions
-  private readonly schoolMarkers = new globalThis.Map<string, L.Marker>();
+  private readonly schoolMarkers = new globalThis.Map<string, Leaflet.Marker>();
 
   private readonly normalMarkerIcon = L.icon({
     iconUrl: '/markers/marker-icon.png',
