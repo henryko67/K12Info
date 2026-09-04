@@ -63,7 +63,7 @@ export class CommentsApi {
     const response = await firstValueFrom(
       this.http.post<{
         message: string;
-        comment: SchoolComment;
+        comment: Omit<SchoolComment, 'is_owner'>;
       }>(
         `/api/schools/${sector}/${schoolId}/comments`,
         { text },
@@ -75,7 +75,10 @@ export class CommentsApi {
       ),
     );
 
-    return response.comment;
+    // A successful authenticated create is necessarily owned by its caller.
+    // Unlike the GET projection, the POST payload does not include is_owner,
+    // so normalize it here before any component inserts it into local state.
+    return { ...response.comment, is_owner: true };
   }
 
   /** Deletes a comment after backend JWT and `author_sub` ownership checks. */

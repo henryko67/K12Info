@@ -16,7 +16,7 @@ import { SchoolsApi } from '../explorer/services/schools-api';
 import { SchoolDetails } from './school-details';
 
 describe('SchoolDetails comments', () => {
-  it('inserts a created comment immediately and ignores its later realtime duplicate', async () => {
+  it('immediately renders a created comment as owned and ignores its later realtime duplicate', async () => {
     const school = privateSchool();
     const createdComment = {
       _id: 'comment-1',
@@ -63,7 +63,8 @@ describe('SchoolDetails comments', () => {
       ],
     });
 
-    const component = TestBed.createComponent(SchoolDetails).componentInstance;
+    const fixture = TestBed.createComponent(SchoolDetails);
+    const component = fixture.componentInstance;
     await vi.waitFor(() => expect(component.school()).toEqual(school));
     TestBed.flushEffects();
     await vi.waitFor(() => expect(commentsApi.getSchoolComments).toHaveBeenCalled());
@@ -72,6 +73,8 @@ describe('SchoolDetails comments', () => {
     await component.postComment();
 
     expect(component.comments()).toEqual([createdComment]);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('details.comment-actions')).not.toBeNull();
 
     realtimeListener?.({ event: 'comment-created', data: { comment_id: createdComment._id } });
     await vi.waitFor(() => expect(commentsApi.getSchoolComments).toHaveBeenCalledTimes(2));
