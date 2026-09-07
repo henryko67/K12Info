@@ -34,13 +34,22 @@ describe('SearchBar', () => {
 
     component.searchForm.controls.query.setValue('first');
     component.onSearch();
+    expect(component.searchLoading()).toBe(true);
+
     component.searchForm.controls.query.setValue('second');
     component.onSearch();
 
     secondResponse.next(second);
     firstResponse.next(first);
+    firstResponse.complete();
+
+    expect(component.searchLoading()).toBe(true);
+    expect(store.searchResponse()).toBe(second);
+
+    secondResponse.complete();
 
     expect(store.searchResponse()).toBe(second);
+    expect(component.searchLoading()).toBe(false);
   });
 });
 

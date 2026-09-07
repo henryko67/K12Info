@@ -11,8 +11,8 @@
     (focus)="openExistingResults()"
     />
 
-    <button type="submit">
-      Search
+    <button type="submit" [disabled]="searchLoading()">
+      {{ searchLoading() ? 'Searching...' : 'Search' }}
     </button>
   </form>
 

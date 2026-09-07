@@ -50,6 +50,7 @@ export class SearchBar {
   });
 
   readonly resultsOpen = signal(false);
+  readonly searchLoading = signal(false);
   readonly loadingMoreLocations = signal(false);
   readonly loadingMoreSchools = signal(false);
 
@@ -83,6 +84,7 @@ export class SearchBar {
     }
 
     const requestId = ++this.searchRequestId;
+    this.searchLoading.set(true);
 
     this.searchApi.search(query).subscribe({
       next: response => {
@@ -96,7 +98,13 @@ export class SearchBar {
       },
       error: error => {
         if (requestId === this.searchRequestId) {
+          this.searchLoading.set(false);
           console.error('Failed to search schools and locations:', error);
+        }
+      },
+      complete: () => {
+        if (requestId === this.searchRequestId) {
+          this.searchLoading.set(false);
         }
       }
     });

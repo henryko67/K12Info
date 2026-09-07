@@ -4,8 +4,9 @@
   <button
     type="button"
     class="search-area-button"
+    [disabled]="searchAreaLoading()"
     (click)="onSearchThisArea()"
   >
-    Search this area
+    {{ searchAreaLoading() ? 'Searching...' : 'Search this area' }}
   </button>
 </div>

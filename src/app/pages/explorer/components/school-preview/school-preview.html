@@ -446,9 +446,10 @@
         } @else {
           <button
             type="button"
+            [disabled]="detailsLoading()"
             (click)="onMoreDetails()"
           >
-            More Details
+            {{ detailsLoading() ? 'Loading...' : 'More Details' }}
           </button>
         }
       }

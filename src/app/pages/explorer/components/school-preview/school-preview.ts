@@ -1,4 +1,4 @@
-import { Component, inject, computed } from '@angular/core';
+import { Component, inject, computed, signal } from '@angular/core';
 import { ExplorerStore } from '../../services/explorer-store';
 import { ExplorerSchool } from '../../models/explorer-school';
 import { SchoolDetailsApi } from '../../services/school-details-api';
@@ -37,6 +37,15 @@ export class SchoolPreview {
 
   readonly selectedSchool = this.explorerStore.selectedSchool;
   readonly detailsOpen = this.explorerStore.detailsOpen;
+  private readonly detailsRequestNcessch = signal<string | null>(null);
+  readonly detailsLoading = computed(() => {
+    const school = this.selectedSchool();
+
+    return (
+      school?.sector === 'public' &&
+      this.detailsRequestNcessch() === school.ids.ncessch
+    );
+  });
 
   readonly formatGrade = formatGrade;
   readonly formatSchoolLevel = formatSchoolLevel;
@@ -99,15 +108,40 @@ export class SchoolPreview {
       return;
     }
 
+    if (this.detailsRequestNcessch() === school.ids.ncessch) {
+      return;
+    }
+
+    const requestedNcessch = school.ids.ncessch;
+    this.detailsRequestNcessch.set(requestedNcessch);
+
     this.schoolDetailsApi
-      .getDetails(school.ids.ncessch)
+      .getDetails(requestedNcessch)
       .subscribe({
         next: details => {
-          this.explorerStore.setSchoolDetails(school.ids.ncessch, details);
+          const selectedSchool = this.explorerStore.selectedSchool();
+
+          if (
+            selectedSchool?.sector !== 'public' ||
+            selectedSchool.ids.ncessch !== requestedNcessch
+          ) {
+            return;
+          }
+
+          this.explorerStore.setSchoolDetails(requestedNcessch, details);
           this.explorerStore.openDetails();
         },
         error: error => {
+          if (this.detailsRequestNcessch() === requestedNcessch) {
+            this.detailsRequestNcessch.set(null);
+          }
+
           console.error('Failed to load expanded school details:', error);
+        },
+        complete: () => {
+          if (this.detailsRequestNcessch() === requestedNcessch) {
+            this.detailsRequestNcessch.set(null);
+          }
         }
       });
   }

@@ -1,7 +1,7 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
-import { of } from 'rxjs';
+import { Subject, of } from 'rxjs';
 
 import { CommentsApi } from '../../services/comments-api';
 import { Auth } from '../../services/auth';
@@ -88,7 +88,8 @@ describe('SchoolDetails expanded-detail reuse', () => {
     const school = publicSchool();
     const details = expandedDetails();
     const store = new ExplorerStore();
-    const getDetails = vi.fn(() => of(details));
+    const detailsResponse = new Subject<SchoolDetailsResponse>();
+    const getDetails = vi.fn(() => detailsResponse);
     const navigate = vi.fn();
 
     store.selectSchool(school);
@@ -132,7 +133,12 @@ describe('SchoolDetails expanded-detail reuse', () => {
     const preview = TestBed.createComponent(SchoolPreview).componentInstance;
     preview.onMoreDetails();
 
+    expect(preview.detailsLoading()).toBe(true);
+    detailsResponse.next(details);
+    detailsResponse.complete();
+
     expect(preview.expandedDetails()).toBe(details);
+    expect(preview.detailsLoading()).toBe(false);
     expect(getDetails).toHaveBeenCalledOnce();
     expect(getDetails).toHaveBeenCalledWith(school.ids.ncessch);
 
@@ -143,6 +149,46 @@ describe('SchoolDetails expanded-detail reuse', () => {
     await vi.waitFor(() => expect(fullPage.expandedDetails()).toBe(details));
 
     expect(getDetails).toHaveBeenCalledOnce();
+  });
+
+  it('ignores expanded details returned after a different school is selected', () => {
+    const firstSchool = publicSchool();
+    const secondSchool: PublicExplorerSchool = {
+      ...publicSchool(),
+      _id: 'public-school-2',
+      ids: {
+        ...publicSchool().ids,
+        school_id: 'public-source-2',
+        ncessch: '210987654321',
+        ncessch_num: 210987654321,
+      },
+    };
+    const detailsResponse = new Subject<SchoolDetailsResponse>();
+    const store = new ExplorerStore();
+
+    store.selectSchool(firstSchool);
+
+    TestBed.configureTestingModule({
+      imports: [SchoolPreview],
+      providers: [
+        { provide: Router, useValue: { navigate: vi.fn() } },
+        { provide: SchoolDetailsApi, useValue: { getDetails: vi.fn(() => detailsResponse) } },
+        { provide: ExplorerStore, useValue: store },
+      ],
+    });
+
+    const preview = TestBed.createComponent(SchoolPreview).componentInstance;
+    preview.onMoreDetails();
+    expect(preview.detailsLoading()).toBe(true);
+
+    store.selectSchool(secondSchool);
+    expect(preview.detailsLoading()).toBe(false);
+
+    detailsResponse.next(expandedDetails());
+    detailsResponse.complete();
+
+    expect(store.schoolDetails()).toBeNull();
+    expect(store.detailsOpen()).toBe(false);
   });
 
   it('fetches and uses expanded details when the full page opens without cached data', async () => {

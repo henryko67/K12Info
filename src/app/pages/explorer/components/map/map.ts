@@ -6,7 +6,8 @@ import {
   ViewChild,
   inject,
   Injector,
-  effect
+  effect,
+  signal
 } from '@angular/core';
 
 import { ExplorerStore } from '../../services/explorer-store';
@@ -32,6 +33,7 @@ export class Map implements AfterViewInit, OnDestroy {
   readonly displayedSchools = this.explorerStore.filteredSchools;
   readonly selectedSchool = this.explorerStore.selectedSchool;
   readonly focusRequest = this.explorerStore.focusRequest;
+  readonly searchAreaLoading = signal(false);
 
   private readonly markerClusterGroup: Leaflet.MarkerClusterGroup =
     L.markerClusterGroup({
@@ -163,12 +165,18 @@ export class Map implements AfterViewInit, OnDestroy {
   }
 
 onSearchThisArea(): void {
+  if (this.searchAreaLoading()) {
+    return;
+  }
+
   const bounds = this.map.getBounds();
 
   const north = bounds.getNorth();
   const south = bounds.getSouth();
   const east = bounds.getEast();
   const west = bounds.getWest();
+
+  this.searchAreaLoading.set(true);
 
   this.mapSearchApi
     .searchByBounds(north, south, east, west)
@@ -184,7 +192,11 @@ onSearchThisArea(): void {
         this.explorerStore.setDisplayedSchools(schools);
       },
       error: error => {
+        this.searchAreaLoading.set(false);
         console.error('Failed to search the visible map area:', error);
+      },
+      complete: () => {
+        this.searchAreaLoading.set(false);
       }
     });
 }
